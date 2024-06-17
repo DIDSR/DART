@@ -53,6 +53,37 @@ function extractChildren(element, criteria={}, excludeCriteria, extracted=[]) { 
     return extracted;
 }
 
+/**
+ * Collapse a table by clicking on its heading row
+ * @param {HTMLElement} table - the table to collapse
+ * @param {bool} [linkCollapse=false] - for tables contained w/in another table: click to collapse all tables in the row
+ */
+function collapseTable(table, linkCollapse=false) {
+    // 
+    var rows = table.rows;
+    
+    if (linkCollapse) {
+        // collapse all of the tables in the same row
+        var rowTables = table.parentElement.parentElement.querySelectorAll("table")
+        for (table of rowTables) {
+            collapseTable(table, false);
+        }
+    } else {
+
+        if (table.classList.contains("collapsed")) {
+            table.classList.remove("collapsed");
+            for (ri = 1; ri < rows.length; ri++) {
+                rows[ri].classList.remove("hidden");
+            }
+        } else {
+            table.classList.add("collapsed");
+            for (ri = 1; ri < rows.length; ri++) {
+                rows[ri].classList.add("hidden");
+            }
+        }
+    }
+}
+
 
 
 
