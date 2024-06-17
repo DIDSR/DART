@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block headcontent %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-management.css') }}">
+{% endblock %}
+
+
+
+{% block pagecontent %}
+    <div id="title-box">
+            <p id="title"> 
+            <span class=emphasis>DART</span>
+            <br>
+            <span class=emphasis>D</span>at<span class=emphasis>a</span> <span class=emphasis>R</span>epresen<span class=emphasis>t</span>ativeness 
+            </p>
+        </div>
+    <div class="center-content">
+        <form method="post" id="database-selection-form">
+            <p>Select a Database:</p>
+            {% for db in databases %}
+                <button type="submit" name="selected-database" class="database-select" value={{db}}>{{ db }} </button>
+                <br>  
+            {% endfor %}
+            <hr>
+            <button type="submit" name="selected-database" class="database-select" value="create-new">Create a new database</button>
+        </form>
+    </div>
+{% endblock %}

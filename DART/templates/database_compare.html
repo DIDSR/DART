@@ -1,0 +1,39 @@
+{% extends 'database_base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-compare.css') }}">
+    <script src="{{ url_for('static', filename='scripts/database-compare.js') }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    <h1 onclick=toggleShow("compare-filters-form")> Filters </h1>
+
+    <form method="post" id="compare-filters-form">
+    {% for i in range(2) %}
+        <fieldset id="subgroup-criteria-{{i}}">
+            <legend>Subgroup {{i+1}}</legend>
+            <script type="text/javascript">
+                buildCriteriaSection("subgroup-criteria-{{i}}", {{ attribute_information|tojson }})
+            </script>
+        </fieldset>
+    {% endfor %}
+        <!-- Additional Query Options -->
+        
+        <fieldset id="additional-criteria">
+            <legend>Options</legend>
+            <script type="text/javascript">
+                buildAdditionalQueryOptions("additional-criteria", {{ attribute_information|tojson }})
+            </script>
+        </fieldset>
+        
+        <input type="submit" value="Find Subgroups">
+    </form>
+    <div id="comparison-status-tracker">
+        <script type="text/javascript">
+            trackProgress(showComparisonSimilarity);
+        </script>
+    </div>
+        
+{% endblock %}

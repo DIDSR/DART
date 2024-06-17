@@ -1,0 +1,17 @@
+/* define theme colors */
+
+.default {
+    --background: aliceblue;
+    --accent-1: #2fa3de;
+    --accent-2: #2381b0;
+    --accent-3: lightgrey; 
+    --accent-4: #5db9e8;
+}
+
+.red-test {
+    --background: white;
+    --accent-1: red;
+    --accent-2: red;
+    --accent-3: red; 
+    --accent-4: red;
+}

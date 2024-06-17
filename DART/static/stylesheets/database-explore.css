@@ -1,0 +1,136 @@
+/* WIP */
+
+#subgroups-section {
+    border-bottom: 4px solid var(--accent-3);
+    width: 100%;
+}
+
+#subgroups-section > div {
+    display: flex;
+}
+
+#subgroups-section > div > div {
+    text-align: center;
+    border: 2px dashed red;
+    flex: 1;
+}
+
+#subgroups-section .subgroup-label * {
+    display: inline-block;
+    min-height: 24px;
+    line-height: 24px;
+    vertical-align: middle;
+}
+
+
+
+/* TODO: move */
+.filter-button {
+    min-width: 24px;
+    min-height: 24px;
+    border: 1px solid;
+    border-radius: 2px;
+}
+
+.filter-button::before {
+    font-family: "Material Icons";
+    content: "filter_alt";
+}
+
+/*  */
+
+
+
+
+
+
+#subgroup-sort {
+    border: 2px solid;
+    float: right;
+}
+
+#level-view-values td {
+    margin: 0px;
+    padding: 10px 20px;
+}
+
+#level-view-values {
+    margin: 20px;
+}
+
+
+#level-view-values tr:hover {
+    transform: scale(1.1) translate(10px, 0px);
+}
+
+/* filters */
+
+#filters {
+    margin: 10px;
+    margin-left: 0px;
+    width: calc(100% - 20px);
+    border-collapse: collapse;
+}
+
+#filters > tr > td {
+    border: 2px solid black;
+}
+
+#filters > tr > td.checkbox-cell {
+    text-align: right;
+    vertical-align: top;
+    border: none;
+}
+#filters .attribute-filter {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#filters .attribute-filter tr.heading {
+    background-color: var(--accent-3);
+}
+
+#filters .attribute-filter th > div {
+    width: 100%;
+    text-align: left;
+}
+
+#filters input[type=number] {
+    width: 100px;
+}
+
+
+form > input[type=submit] {
+    text-align: center;
+    width: calc(100% - 100px); /* fill width with margin */
+    margin: 0px 50px 10px;
+    border: 2px solid var(--accent-2);
+    background-color: var(--accent-1);
+    border-radius: 20px;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.link-checkbox > .checkbox {
+    display: none;
+}
+
+.link-checkbox .icon::before {
+    font-family: "Material Icons";
+    content: "link_off";
+}
+
+
+.link-checkbox input[type=checkbox]:checked + .icon::before {
+    font-family: "Material Icons";
+    content: "link";
+}
+
+#toggle-remove-inherent {
+    float: right;
+    font-size: 12px;
+    --active-color: rgb(0,0,0, 0.6);
+    --inactive-color: rgb(0,0,0, 0.3);
+}
+
+

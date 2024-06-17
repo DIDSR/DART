@@ -1,0 +1,40 @@
+
+
+/* Database Selection Page */
+#title-box {
+    border: 10px outset var(--accent-1);
+    /*box-shadow: -10px 10px 0 3px skyblue;*/
+    border-radius: 2px;
+    position: absolute;
+    display: block;
+    min-height: 30px;
+    width: 600px;
+    padding: 40px;
+    margin: 20px 0px 0px;
+    text-align: center;
+    left: 50%;
+    transform: translate(-50%, 0%);
+}
+
+#title-box #title {
+    font-size: 40px;
+    font-weight: bold;
+    color: var(--accent-1);
+}
+
+#title-box #title .emphasis {
+    color: var(--accent-2);
+    font-size: 45px;
+}
+
+#database-selection-form {
+    text-align: center;
+    
+}
+#database-selection-form > hr {
+    margin: 4px 0px;
+}
+.database-select {
+    width: 100%;
+    margin: 4px 0px;
+}

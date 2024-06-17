@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <title> DART </title>
+        <!-- Icon from  https://free-icons.github.io/free-icons/ -->
+        <link rel="shortcut icon" href="{{ url_for('static', filename='bullseye-arrow.ico') }}">
+        
+        <!-- Style sheets -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/themes.css') }}" title=themes>
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/style.css') }}">
+        
+        <!-- Script Files -->
+        <script src="{{ url_for('static', filename='scripts/scripts.js') }}"></script>
+        <script src="{{ url_for('static', filename='scripts/colormaps.js') }}"></script>
+        <script src="{{ url_for('static', filename='scripts/visuals.js') }}"></script>
+        
+        {% block headcontent %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block pagecontent %}
+        {% endblock %}
+    </body>
+    <script type="text/javascript">
+        initPage();
+        applyColormap();
+    </script>
+</html>

@@ -1,0 +1,303 @@
+/* section headings */
+.content h1, .content h2, .content h3, .content h4 { /* content headers */
+    border-bottom: 5px solid var(--accent-3);
+    padding: 0px 5px;
+}
+
+/* Top bars */
+.database-indicator-bar {
+    height: 15px;
+    background-color: var(--accent-3);
+    font-size: 12px;
+    line-height: 15px;
+    padding: 0px 5px;
+    font-style: italic;
+}
+.database-config-bar {
+    background-color: var(--accent-1);
+    width: 100%;
+    height: 50px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    z-index: 50;
+}
+
+.database-config-bar * {
+    height: 100%;
+}
+
+.database-config-bar > .bar-title {
+    padding: 0px 5px;
+    float: left;
+    flex: 1;
+    line-height: 50px; /* same as bar height -> verticaly centered */
+}
+
+.database-config-bar form {
+    width: 100%;
+    flex: 9999; /* fill remaining width */
+}
+
+.database-config-bar button {
+    border: none;
+    width: 33.33%; /* fallback for browsers w/o calc */
+    width: calc(100%/3);
+    position: relative;
+    float: left;
+    background-color: var(--accent-1);
+    font-size: 20px;
+}
+
+.database-config-bar .active {
+    background-color: var(--accent-2);
+}
+
+.database-config-bar button:hover {
+    background-color: var(--accent-4);
+}
+
+
+/* Status Bar */
+body {
+    padding-bottom: 20px; /* to have room for the status bar */
+}
+#status-bar {
+    --size: 16px;
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100vw;
+    height: var(--size);
+    background-color: var(--accent-3);
+    font-size: 0px;
+}
+
+#status-bar #progress-indicator {
+    position: absolute;
+    right: 20px;
+    height: var(--size);
+    vertical-align: middle;
+}
+#status-bar #progress-indicator * {
+    max-height: var(--size);
+}
+
+#status-bar[status=idle] #progress-indicator {
+    display: none;
+}
+
+#status-bar * {
+    display: inline-block;
+    min-height: var(--size);
+    text-align: center;
+    line-height: var(--size);
+    vertical-align: middle;
+    color: rgb(0,0,0,0.3);
+    font-size: calc(var(--size) * 0.75);
+}
+
+#status-indicator-icon {
+    width: var(--size);
+    height: var(--size);
+    font-style: normal;
+    transform-origin: center;
+    font-size: var(--size);
+}
+
+#status-indicator-text {
+    border-left: 2px solid rgb(0,0,0,0.1);
+    padding-left: 5px;
+}
+
+#status-bar[status=idle] #status-indicator-icon::before {
+    font-family: "Material Icons";
+    content: "check";
+}
+
+#status-bar[status=running] #status-indicator-icon::before {
+    font-family: "Material Icons";
+    content: "autorenew";
+}
+
+#status-bar[status=running] #status-indicator-icon {
+    animation: spinning 5s linear infinite;
+}
+@keyframes spinning {
+    to { transform: rotate(360deg); }
+}
+
+
+/* Config Menu (and Button) */
+#config-button {
+    z-index: 9999; /* ALWAYS on top */
+    fill: var(--accent-2);
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    stroke: white;
+    stroke-width: 5;
+}
+
+#config-button:hover {
+    fill: var(--accent-4);
+    stroke-width: 10;
+}
+
+#config-window {
+    z-index: 100;
+    --border: 2px solid var(--accent-1);
+    --border-thick: 4px solid var(--accent-1);
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(150,150,150,0.7);
+}
+
+#config-window table {
+    border: var(--border);
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+#config-window th {
+    border: var(--border);
+}
+
+#config-window-content {
+    width: 80vw;
+    height: 80vh;
+    background-color: var(--background);
+    border: var(--border-thick);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1.0;
+    display: table;
+    /*overflow: hidden;*/
+}
+
+#config-window-content >  * {
+    position: relative;
+    
+}
+
+#config-window-content h1 {
+    font-size: 20px;
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+    display: table-row;
+}
+
+#config-submenu-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+#config-submenu-bar span {
+    width: 50%;
+    text-align: center;
+}
+#config-submenu-bar > span {
+    border-left: var(--border);
+    border-top: var(--border);
+    border-right: var(--border);
+}
+
+#config-submenu-bar > span.inactive {
+    border: none;
+    border-bottom: var(--border);
+}
+
+#config-window-content > form.inactive {
+    display: none;
+}
+
+#config-window-content > form {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+}
+
+#theme-preview {
+    padding: 0px;
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+#theme-preview div {
+    
+}
+.theme-color-name {
+    height: 5vh;
+    display: inline-block;
+    line-height: 5vh;
+}
+
+.color-preview {
+    border: 1px solid black;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    margin: 2px;
+}
+
+#cpal-count {
+    width: 50px;
+    float: right;
+}
+
+
+/* Distribution Graphics */
+svg * {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.dist-element:hover {
+    transform: scale(1.1);
+    z-index: 1;
+}
+.distribution-view-wrapper  {
+    width: 100%;
+    table-layout: auto;
+    min-height: 200px; /* TODO? */
+    display: table;
+    height: auto;
+}
+
+.distribution-view > select {
+    position: relative;
+    float: left;
+    left: 0%;
+    top: 0%;
+    margin: 5px;
+}
+
+/* Legends */
+.legend {
+    border: 2px solid var(--accent-3);
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+.legend td.colorbox {
+    min-height: 20px;
+    min-width: 20px;
+    border: 2px solid black;
+}
+
+.legend th {
+    text-align: center;
+}

@@ -1,0 +1,168 @@
+/* dev / debug section --> to be removed */
+
+#TODO {
+    color: red;
+    border: 2px solid red;
+    font-size: 10px;
+    position: absolute;
+    left: 1%;
+    top: 1%;
+    background-color: white;
+}
+
+#TODO li {
+    margin-left: 10px;
+}
+
+#TODO h4 {
+    background-color: rgb(255,0,0,0.2);
+    padding: 2px;
+}
+
+/* Define colormaps / palettes */
+
+:root {
+    --current-colormap: var(--colormap-pink-blue);
+    --current-palette: var(--colormap-pink-blue);
+    --colormap-red-blue: red, blue;
+    --colormap-red-yellow-green-blue: red, yellow, green, blue;
+    --colormap-pink-blue: palevioletred, deepskyblue;
+
+}
+
+
+/* Styles that are applied broadly across pages */
+
+* {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background-color: var(--background);
+}
+
+.hidden {
+    display: none;
+}
+
+.center-content {
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    flex-flow: wrap;
+    height: 80vh; /* 100 - 2*padding */
+    padding: 10vh;
+}
+
+button { /* Make sure that buttons are clickable */
+  min-height: 15px;
+  min-width: 15px
+}
+
+/*// Section Headings //*/
+.section-heading {
+    border-bottom: 2px solid var(--accent-3);
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.section-heading.h2 {
+    padding-left: 20px;
+    font-size: 16px;
+}
+
+.section-heading.collapsed {
+    border-bottom: 5px solid var(--accent-3);
+}
+.section-heading * {
+    display: inline-block;
+}
+
+.section-heading .toggle {/* toggles used to limit section height */
+    float: right;
+    font-size: 12px;
+    --active-color: rgb(0,0,0,0.2);
+    --inactive-color: rgb(0,0,0,0.2);
+}
+/* // sections with limited height // */
+.limited-height {
+    max-height: 50vh;
+    border-bottom: 5px solid var(--accent-3);
+    overflow-y: scroll;
+}
+
+/*// collapsible menus //*/
+.collapsible {
+    min-height: 24px; /* Icon Size */
+}
+
+.collapsible * { /* Align text and icon */
+    min-height: 24px;
+    line-height: 24px;
+    vertical-align: middle;
+}
+
+.collapse-icon { /* TODO: rotate transition */
+    margin: 0px 10px;
+    transform-origin: center;
+    transform: rotate(90deg);
+}
+
+.collapsed .collapse-icon  {
+    transform: rotate(0deg);
+}
+
+/*// Toggle switches //*/
+
+.toggle {
+    min-height: 24px; /* default icon size */
+    display: inline-block;
+    /* To allow this functioanlity on specific toggles */
+    --active-color : black;
+    --inactive-color: black;
+}
+
+.toggle input[type=checkbox] {
+    display: none;
+}
+
+.toggle * { /* Align test with icon */
+    line-height: 24px;
+    vertical-align: middle;
+}
+
+/*/// Styling inactive toggles ///*/
+.toggle {
+    color: var(--inactive-color);
+}
+.toggle .active-text {
+    display: none;
+}
+
+.toggle .inactive-text {
+    display: inline-block;
+}
+
+.toggle .icon::before {
+    font-family: "Material Icons";
+    content: "toggle_off";
+}
+
+/*/// Styling active toggles ///*/
+.toggle:has(input[type=checkbox]:checked) {
+    color: var(--active-color);
+}
+.toggle:has(input[type=checkbox]:checked) .active-text {
+    display: inline-block;
+}
+.toggle:has(input[type=checkbox]:checked) .inactive-text {
+    display: none;
+}
+
+.toggle input[type=checkbox]:checked + .icon::before {
+    font-family: "Material Icons";
+    content: "toggle_on";
+}

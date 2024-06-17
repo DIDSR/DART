@@ -1,0 +1,24 @@
+{% extends 'database_base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-details.css') }}">
+    <script type="text/javascript">
+        toStorage("attribute-information", {{attribute_information|tojson}});
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id=details-top-block> <!-- TODO -->
+        Show overall number of ids/samples up here.
+    </div>
+    <div id=attribute-overview>
+        {% for attribute in distribution_information %}
+            <script type="text/javascript" >
+                toStorage("{{attribute}}-details", {{distribution_information[attribute]|tojson}});
+                makeDistViewSection("{{attribute}}","{{attribute}}-details", "attribute-overview", true);
+            </script>
+        {% endfor %}
+        
+    </div>
+    
+{% endblock %}
