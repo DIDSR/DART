@@ -2,12 +2,34 @@
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-compare.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/criteria-filters.css') }}">
+    <script src="{{ url_for('static', filename='scripts/criteria-filters.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/database-compare.js') }}"></script>
 {% endblock %}
 
 
 
 {% block content %}
+    <div onclick=toggleCollapse(this) target="filter-section" class="collapsible section-heading">
+        <i class="material-icons collapse-icon">chevron_right</i>
+        <span>Filters</span>
+        <label class=toggle>
+            <span class=active-text>Limit height</span>
+            <span class=inactive-text>Limit height</span>
+            <input type=checkbox onchange=toggleClass("filter-section","limited-height")>
+            <i class="material-icons icon"> </i>
+        </label>
+    </div>
+    
+    <form id=filter-section>
+        <table id=filters>
+        </table>
+        <input type=submit value="Find Subgroups" />
+    </form>
+    <script type="text/javascript">
+        createFilterSection();
+    </script>
+    <!--
     <h1 onclick=toggleShow("compare-filters-form")> Filters </h1>
 
     <form method="post" id="compare-filters-form">
@@ -20,7 +42,7 @@
         </fieldset>
     {% endfor %}
         <!-- Additional Query Options -->
-        
+        <!--
         <fieldset id="additional-criteria">
             <legend>Options</legend>
             <script type="text/javascript">
@@ -30,10 +52,11 @@
         
         <input type="submit" value="Find Subgroups">
     </form>
+
     <div id="comparison-status-tracker">
         <script type="text/javascript">
             trackProgress(showComparisonSimilarity);
         </script>
     </div>
-        
+        -->
 {% endblock %}

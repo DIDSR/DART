@@ -1,10 +1,11 @@
 {% extends 'database_base.html' %}
 
 {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-explore.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/criteria-filters.css') }}">
     <script src="{{ url_for('static', filename='scripts/database-explore.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/criteria-filters.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-explore.css') }}">
-    {% endblock %}
+{% endblock %}
 
 
 {% block content %}
@@ -18,7 +19,7 @@
             <i class="material-icons icon"> </i>
         </label>
     </div>
-    <!--<h2 onclick=toggleShow("filter-section")> Filters </h2>-->
+    
     <form id=filter-section>
         <table id=filters>
         </table>
