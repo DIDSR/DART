@@ -1,6 +1,63 @@
 
+/* || Element creation utilities */
+
+/**
+ * Creates an HTML checkbox input
+ * @constructor
+ * @param {string} name - the name assigned to the checkbox
+ * @param {(string|number)} - the value assigned to the checkbox
+ */
+function checkBox(name, value) {
+    // create a checkbox element
+    var cb = document.createElement("input");
+        cb.setAttribute("type", "checkbox");
+        cb.classList.add("checkbox");
+        cb.setAttribute("name", name);
+        cb.value = value;
+    return cb;
+}
+
+/* || HTML Utilities */
+
+function extractChildren(element, criteria={}, excludeCriteria, extracted=[]) { // TODO: I think that this can be replaced with HTMLElement.querySelectorAll(*args)
+    var meetsCriteria = true;
+    for (key in criteria) {
+        if (!meetsCriteria) {
+            break;
+        }
+        if (key == "class") {
+            meetsCriteria = element.classList.contains(criteria[key]);
+        } else {
+            meetsCriteria = element.getAttribute(key) == criteria[key];
+        }
+        
+    }
+    for (key in excludeCriteria) {
+        if (!meetsCriteria) {
+            break;
+        }
+        if (key == "class") {
+            meetsCriteria = !element.classList.contains(excludeCriteria[key]);
+        } else {
+            meetsCriteria = element.getAttribute(key) != excludeCriteria[key];
+        }
+    }
+    if (meetsCriteria) {
+        extracted.push(element);
+    }
+    if (element.children) {
+        for (child of element.children) {
+            extracted = extractChildren(child, criteria, excludeCriteria, extracted);
+        }
+    }
+    return extracted;
+}
 
 
+
+
+
+/* Unsorted */
 function isEmpty(element) { // TODO: move to scripts.py
     return element.childNodes.length < 1;
 }
