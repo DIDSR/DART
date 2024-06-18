@@ -14,12 +14,6 @@ import re
 
 
 
-# TODO: ==============================================================================================
-    # Check that BY_ID is working as intended 
-        # (may need to calculate scale factor when fetching samples -> may not be representing properly when only a portion of an ID's samples are in a subgroup) (e.g., if a patient has both CR and DX and the subgroup selected is CR)
-    # subgroup name formatting (what should each subgroup be referred to as?)
-        
-# ====================================================================================================
 
 # DEFAULTS -> eventually move to some kind of config file
 MAX_BINS_PER_ATTRIBUTE = 10
@@ -85,6 +79,30 @@ def create_hypervectors(values, variable_type:str, vsa_model=VSA_MODEL, dimensio
         func = torchhd.level
     HV = func(len(values), dimensionality, vsa=vsa_model, **kwargs)
     return {v: HV[[i],:] for i,v in enumerate(values)}
+    
+    
+def remove_inherent(values:dict, inherent):
+    return {k:v for (k,v) in values.items() if k not in inherent}
+        
+def determine_matching(criteria1, criteria2, group1, group2):
+    """ Determine which of the subgroups are matching and for which the equivalent are missing """
+    #TODO: work with all numeric operators (>, <, <=, >=) 
+    atts1 = [c.split("=")[0] for c in criteria1]
+    atts2 = [c.split("=")[0] for c in criteria2]
+    #extract the non-user-specified portion of the subgroups found
+    sub1 = {k:remove_inherent(v, atts1) for (k,v) in group1.items()}
+    sub2 = {k:remove_inherent(v, atts2) for (k,v) in group2.items()}
+    # see which of the subgroups are represented in both specified populations and get the equivalent subgroup's id
+    pairs = []
+    for k in sub1:
+        corresponding = list(filter(lambda x: sub2[x] == sub1[k], sub2))
+        if len(corresponding) == 1:
+            k2 = corresponding[0]
+            pairs.append((k,k2))
+            
+    return pairs
+    
+    
 
 class Manager(object):
     def __init__(
@@ -92,7 +110,7 @@ class Manager(object):
             name:str,
             data_file=None, 
             taxonomy_file=None, 
-            save_location="../localdata", # TODO
+            save_location="../localdata",
             id_col = None,
             attributes = [],
         ):
@@ -147,7 +165,10 @@ class Manager(object):
 
         # pre-process attributes (names and values)
         self.attributes = []
+        
         if attributes: # a list of attributes was provided
+            if not set(attributes).issubset(set(data.columns.tolist())):
+                data = pd.read_csv(data_file, sep="\t") # DEBUG _> some csvs save as tsvs
             assert set(attributes).issubset(set(data.columns.tolist())) # TODO: better error handling
         else:
             attributes = list(set(data.columns.tolist()) - set([id_col]))
@@ -254,10 +275,6 @@ class Manager(object):
             attribute = self.fetch_attribute(attribute)
         self.hypervectors[attribute.name] = create_hypervectors(attribute.values, attribute.type)
         
-        
-    
-    
-    
     def basis_similarity(self, verbose=False, groups=True): # TODO: figure out why not every single combination is calculated (seems to miss a small random subset every time)
         """ 
         Get the pairwise similarity between the basis hypervectors. 
@@ -277,7 +294,7 @@ class Manager(object):
             
             
     
-    def compare(self, group1:list, group2:list, compare_attributes=[], STATUS={}) -> dict:
+    def compare(self, group1:list, group2:list, compare_attributes=[], STATUS={}) -> dict: # TODO: remove?
         """ compare two pre-defined subgroups """
         STATUS["status"] = "running"
         STATUS["comparison"] = {}
@@ -331,14 +348,15 @@ class Manager(object):
         
         
             
-    def explore(self, group1:list, group2:list=None, joint={}, compare_attributes=[], verbose=False, STATUS={}) -> dict: # CURRENT WIP ======================================================================
+    def explore(self, operation:str, group1:list, group2:list=None, ensure_matching=False, joint={}, compare_attributes=[], verbose=False, STATUS={}) -> dict: 
         """ Select the subgroups that meet each criteria (passed to self.filter_subgroups) and make comparisons between. """
         # TODO (?): multithreading/processing -> this is where the number of subgroups will impact performance
+        # TODO: rename (confusing since it does both compare and explore now)
         
         print("BEGINNING EXPLORE")
         STATUS["status"] = "running"
         STATUS['progress'] = 0;
-        STATUS["explore"] = {}
+        STATUS[operation] = {}
         self.init_connection() # ensure thread
         
         if not compare_attributes: # not specified -> use all
@@ -347,16 +365,18 @@ class Manager(object):
         if group2 is None:
             group2 = group1       
         
+        criteria1 = group1
+        criteria2 = group2
         # Get all of the subgroups that match the criteria given
         subgroups = [self.filter_subgroups(*c, **joint, return_index=True) for c in [group1,group2]]
         
         group1, group2 = subgroups
-        STATUS["explore"]["subgroups"] = {"by-group":{"Subgroup 1": group1, "Subgroup 2": group2}}
+        STATUS[operation]["subgroups"] = {"by-group":{"Subgroup 1": group1, "Subgroup 2": group2}}
         subgroups = group1 | group2
         # Get the subgroups (IDs and HVs)
         subgroup_HVs = {}
         subgroup_IDs = {}
-        STATUS['explore']["subgroups"]['subgroups-by-id'] = {}
+        STATUS[operation]["subgroups"]['subgroups-by-id'] = {}
         for idx, criteria in subgroups.items():
             criteria = list(map(format_subgroup_criteria, criteria.keys(), criteria.values()))
             criteria = [x for y in criteria for x in y]
@@ -366,21 +386,25 @@ class Manager(object):
             # add the subgroup ID information to the status tracker
             #STATUS['explore']["subgroups"]['subgroups-by-id'][idx] = subgroup_IDs[idx]
         
-        if ALLOW_OVERLAP: # allow the comparison of groups that have IDs in common
-            print("allowing overlap") # DEBUG
-            pairs = product(group1, group2)
-            n_comparisons = len(group1) * len(group2)
+        if ensure_matching:
+            pairs = determine_matching(criteria1, criteria2, group1, group2)
+            n_comparisons = len(pairs) 
         else:
-            print("NOT allowing overlap") # DEBUG
-            # determine subgroup overlap
-            overlap = {(s1,s2):len(set(subgroup_IDs[s1]) & set(subgroup_IDs[s2])) for (s1,s2) in product(group1, group2)}
-            pairs = [k for k,v in overlap.items() if v == 0]
-            n_comparisons = len(pairs)
+            if ALLOW_OVERLAP: # allow the comparison of groups that have IDs in common
+                print("allowing overlap") # DEBUG
+                pairs = product(group1, group2)
+                n_comparisons = len(group1) * len(group2)
+            else:
+                print("NOT allowing overlap") # DEBUG
+                # determine subgroup overlap
+                overlap = {(s1,s2):len(set(subgroup_IDs[s1]) & set(subgroup_IDs[s2])) for (s1,s2) in product(group1, group2)}
+                pairs = [k for k,v in overlap.items() if v == 0]
+                n_comparisons = len(pairs)
         
         # There may be a way to make this faster by just looping through one group and comparing that hypervector to every single one in group 2 at once (or in a few sub sets) (like in the pariwise_similarity function), but there would need to be a different way to get the attribute overlap (and create the correct "overall" vector) for each pair.
         # actually make the comparisons
         STATUS["progress"] = 0
-        STATUS["explore"]["similarity"] = []
+        STATUS[operation]["similarity"] = []
         i = 0
         comparisons = {}
         for pair in pairs:
@@ -394,7 +418,7 @@ class Manager(object):
             HVs = [reduce(torchhd.bundle, [HV[att] for att in att_overlap]) for HV in HVs]
             comparisons[pair]["overall"] = similarity[SIMILARITY_MEASURE](*HVs).item()
             # propagate to the flask app -> convert the format slightly...
-            STATUS["explore"]["similarity"].append({
+            STATUS[operation]["similarity"].append({
                     "Subgroup 1": subgroups[pair[0]] | {"sample-IDs" : subgroup_IDs[pair[0]], "ID":pair[0]},
                     "Subgroup 2": subgroups[pair[1]] | {"sample-IDs" : subgroup_IDs[pair[1]], "ID":pair[1]},
                 } | comparisons[pair]
@@ -407,6 +431,7 @@ class Manager(object):
             
         STATUS['status'] = "complete"
         print("EXPLORE COMPLETE") # DEBUG
+        print("STATUS:", STATUS.keys())
         return comparisons      
             
         

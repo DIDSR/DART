@@ -26,9 +26,10 @@ var additionalFilterOptions = {
 
 /**
  * Creates the filter section
+ * @param{string} operation - what the form is for (compare/explore)
  * @param{Array} [removeFilterOptions=[]] - A list of options to be excluded from the filter section
  */
-function createFilterSection(removeFilterOptions=[]) {
+function createFilterSection(operation, removeFilterOptions=[]) {
     var info = fromStorage("attribute-information");
     var table = document.getElementById("filters");
     // remove the indicated filter options
@@ -85,7 +86,7 @@ function createFilterSection(removeFilterOptions=[]) {
             var formData = new FormData(form);
             var data = processFilters(form);
             
-            data["requested-operation"] = "explore";
+            data["requested-operation"] = operation;
             let request = new XMLHttpRequest();
                 request.open("POST", "form-data");
                 request.send(JSON.stringify(data));
@@ -94,11 +95,11 @@ function createFilterSection(removeFilterOptions=[]) {
         });
     //// set up an event listener for the job-submitted event
     document.body.addEventListener("job-submitted", (e) => {
-        setTimeout(monitorJobProgress, 100,"explore"); // give the program a chance to start
+        setTimeout(monitorJobProgress, 100, operation); // give the program a chance to start
         });
     
     // check the status for previous jobs -> if there is a completed one -> load the results
-    monitorJobProgress("explore");
+    monitorJobProgress(operation);
 }
 
 
@@ -313,13 +314,15 @@ function updateFilterSection() {
     var nActive = Array.from(activeAttributes).length
     for (elemGroup of ["1", "2", "linked"]) {
         var element = document.getElementById(`filters[${elemGroup}][n_attributes][lower-bound]`);
+        
         if (element) {
             element.setAttribute("min", nActive);
+            if (element.value && element.value < nActive) {
+                element.value = nActive;
+            }
         }
         
-        if (element.value && element.value < nActive) {
-            element.value = nActive;
-        }
+        
     }
     
 }

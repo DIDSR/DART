@@ -194,7 +194,8 @@ const loadableSectionsByProgram = {
     "explore": {
         //"subgroups":"subgroups", // Commented out until it's determined if this section is needed
         "similarity":"similarity",
-    }
+    },
+    "compare": ["results"],
 }
 
 async function monitorJobProgress(program, update_every=1000) { 
@@ -205,21 +206,29 @@ async function monitorJobProgress(program, update_every=1000) {
     if (status === undefined) {// No job running or complete
         return;
     }
-    var statusInfo = await getStatus(program);    
+    var debug = await getStatus();
+    var statusInfo = await getStatus(program);  
     // determine what sections need to be created/loaded/updated
     var sectionsToLoad = [];
-    for (key in loadableSectionsByProgram[program]) {
-        var infoNeeded = loadableSectionsByProgram[program][key];
-        if (statusInfo[infoNeeded]) { sectionsToLoad.push(key) };
-    }  
-    
-    //// load needed sections
-    console.log("loading needed sections...");
-    for (section of sectionsToLoad) {
-        console.log("loading:", section); //
-        loadSection(section, statusInfo[loadableSectionsByProgram[program][section]]);
+    if (program == "explore") { // TODO: see if it works with the compare format
+        for (key in loadableSectionsByProgram[program]) {
+            var infoNeeded = loadableSectionsByProgram[program][key];
+            if (statusInfo[infoNeeded]) { sectionsToLoad.push(key) };
+        }  
+    } else { // compare format
+        var sectionsToLoad = loadableSectionsByProgram[program];
     }
     
+    //// load needed sections
+    console.log("loading needed sections..."); //
+    for (section of sectionsToLoad) {
+        console.log("loading:", section); //
+        if (program == "explore") { // TODO: see if I can convert to work with the compare format
+            loadSection(section, statusInfo[loadableSectionsByProgram[program][section]]);
+        } else { // compare format
+            loadSection(section, statusInfo);
+        }
+    }
     
     // continue to check status if program still running
     if (status == "running") {

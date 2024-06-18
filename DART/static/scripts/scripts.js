@@ -85,6 +85,18 @@ function collapseTable(table, linkCollapse=false) {
 }
 
 
+/* || General Utilities */
+
+/**
+ * Check if two objects are the same
+ * @param {object} x - one of the objects to compare
+ * @param {object} y - the other object to compare
+ * @returns {bool} object equivalence
+ */
+function isEquiv(x, y) {
+    return JSON.stringify(x) == JSON.stringify(y);
+}
+
 
 
 

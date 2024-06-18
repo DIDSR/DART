@@ -7,8 +7,6 @@
     <script src="{{ url_for('static', filename='scripts/database-compare.js') }}"></script>
 {% endblock %}
 
-
-
 {% block content %}
     <div onclick=toggleCollapse(this) target="filter-section" class="collapsible section-heading">
         <i class="material-icons collapse-icon">chevron_right</i>
@@ -21,42 +19,19 @@
         </label>
     </div>
     
-    <form id=filter-section>
+    <form id=filter-section hidden> <!-- DEBUG: hidden -->
         <table id=filters>
         </table>
         <input type=submit value="Find Subgroups" />
     </form>
     <script type="text/javascript">
-        createFilterSection();
+        createFilterSection("compare", removeFilterOptions=["n_attributes", "size"]);
     </script>
-    <!--
-    <h1 onclick=toggleShow("compare-filters-form")> Filters </h1>
-
-    <form method="post" id="compare-filters-form">
-    {% for i in range(2) %}
-        <fieldset id="subgroup-criteria-{{i}}">
-            <legend>Subgroup {{i+1}}</legend>
-            <script type="text/javascript">
-                buildCriteriaSection("subgroup-criteria-{{i}}", {{ attribute_information|tojson }})
-            </script>
-        </fieldset>
-    {% endfor %}
-        <!-- Additional Query Options -->
-        <!--
-        <fieldset id="additional-criteria">
-            <legend>Options</legend>
-            <script type="text/javascript">
-                buildAdditionalQueryOptions("additional-criteria", {{ attribute_information|tojson }})
-            </script>
-        </fieldset>
-        
-        <input type="submit" value="Find Subgroups">
-    </form>
-
-    <div id="comparison-status-tracker">
-        <script type="text/javascript">
-            trackProgress(showComparisonSimilarity);
-        </script>
+    
+    
+    <div onclick=toggleCollapse(this) id=results-section-heading target=results-section class="collapsible section-heading" hidden>
+        <i class="material-icons collapse-icon">chevron_right</i>
+        <span>Results</span>
     </div>
-        -->
+    <div id=results-section hidden></div> 
 {% endblock %}

@@ -17,12 +17,13 @@ def extract_file_information(filepath):
     info = {}
     print(filepath)
     df = pd.read_csv(filepath) # TODO: other file types
+    if len(df.columns) == 1: # DEBUG -> some csvs actually save as tsvs
+        df = pd.read_csv(filepath, sep="\t")
     for col in df.columns:
-        info[col] = df[col].unique().tolist()    
+        info[col] = df[col].unique().tolist()  
+      
     return info
 
-        
-    
 def process_database_creation_input(form):
     id_col = None if form["id-col"] == "None" else form["id-col"]
     attributes = {att:{} for att in form.getlist("attribute-column") if att != id_col}
@@ -40,34 +41,7 @@ def process_database_creation_input(form):
         
     
     database_name = form["database-name"] if len(form["database-name"]) > 0 else "Unnamed Database"
-    
     return {"attributes":attributes, "id_col":id_col, "name":database_name}
-""" 
-def process_attribute_filters(info, attribute):
-    att_type = info[f"{attribute}-type"]
-    info = {k:v for k,v in info.items() if k.split("-")[0] == attribute and k.split("-")[-1] != "type"} # get only relevant information
-    if att_type == "categorical":
-        return " OR ".join([f"{attribute}={v}" for v in info.values()])
-    elif att_type == "numeric": ### PICKUP HERE -> TODO: Numeric, align the output of this function with the input of the DB comparison function
-        comps = {int(k.split("-")[-1]):v for k,v in info.items() if k.split("-")[-2] == "comp"}
-        values = {int(k.split("-")[-1]):v for k,v in info.items() if k.split("-")[-2] == "val"}
-        joins = {int(k.split("-")[-1]):v for k,v in info.items() if k.split("-")[-2] == "join"}
-        criteria = [f" {joins[i].upper()} {attribute}{comps[i]}{values[i]}" if i in joins else f"{attribute}{comps[i]}{values[i]}" for i in values ]
-        return "".join(criteria)
-
-"""
-
-def process_filters(form):
-    groups = set([k.split("-")[0] for k in form if k.split("-")[0].isdigit()])
-    criteria = []
-    for g in groups:
-        group_criteria = []
-        items = {"-".join(k.split("-")[1:]):v for k,v in form.items() if k.split("-")[0] == g}
-        attributes = [v for k,v in items.items() if k == "attribute"]
-        attributes = form.getlist(f"{g}-attribute")
-        criteria.append([process_attribute_filters(items, att) for att in attributes])
-    return criteria
-
     
 def get_attribute_information(attributes):
     out = {
@@ -174,11 +148,6 @@ def create_app() -> Flask: # Main function -------------------------------------
         if request.method == "POST":
             if "navigate-to" in request.form:
                 return redirect(url_for(request.form["navigate-to"]))
-            # process the query criteria
-            criteria = process_filters(request.form)
-            # make comparison
-            t = Thread(target=app.config["DB"].compare, args=[*criteria], kwargs=dict(STATUS=status,compare_attributes=request.form.getlist("consider")))
-            t.start()
         return render_template("database_compare.html", database_name=app.config["ACTIVE"], attribute_information=get_attribute_information(app.config["DB"].attributes), status=status)
         
         
@@ -202,9 +171,24 @@ def create_app() -> Flask: # Main function -------------------------------------
                 t = Thread(
                     target=app.config["DB"].explore,
                     kwargs = dict(
+                        operation = "explore",
+                        group1=data["1"],
+                        group2=data["2"],
+                        ensure_matching=True,
+                        compare_attributes=data["similarity-attributes"],
+                        STATUS=status,
+                    ),
+                )
+                t.start()
+            elif data['requested-operation'] == 'compare':
+                t = Thread(
+                    target=app.config["DB"].explore,
+                    kwargs = dict(
+                        operation = "compare",
                         group1=data["1"],
                         group2=data["2"],
                         compare_attributes=data["similarity-attributes"],
+                        ensure_matching=True,
                         STATUS=status,
                     ),
                 )
