@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/database-compare.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/criteria-filters.css') }}">
     <script src="{{ url_for('static', filename='scripts/criteria-filters.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/similarity-levels.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/database-compare.js') }}"></script>
 {% endblock %}
 
@@ -19,7 +20,7 @@
         </label>
     </div>
     
-    <form id=filter-section hidden> <!-- DEBUG: hidden -->
+    <form id=filter-section>
         <table id=filters>
         </table>
         <input type=submit value="Find Subgroups" />
@@ -33,5 +34,5 @@
         <i class="material-icons collapse-icon">chevron_right</i>
         <span>Results</span>
     </div>
-    <div id=results-section hidden></div> 
+    <resizable-pane resize="bottom" id=results-section hidden></resizable-pane> 
 {% endblock %}

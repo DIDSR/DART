@@ -382,11 +382,13 @@ class Manager(object):
             criteria = [x for y in criteria for x in y]
             sub = self.fetch_subgroup(*criteria)
             # TODO: remove inherent option
-            subgroup_HVs[idx], subgroup_IDs[idx] = self.get_group_hypervectors(sub, compare_attributes, return_ids=True)
             # add the subgroup ID information to the status tracker
+            subgroup_HVs[idx], subgroup_IDs[idx] = self.get_group_hypervectors(sub, compare_attributes, return_ids=True)
+            STATUS[operation]["subgroups"]["subgroups-by-id"][idx] = self.get_group_distributions(sub, compare_attributes)
+            STATUS[operation]["subgroups"]["subgroups-by-id"][idx]["size"] = len(subgroup_IDs[idx])
             #STATUS['explore']["subgroups"]['subgroups-by-id'][idx] = subgroup_IDs[idx]
         
-        if ensure_matching:
+        if ensure_matching: # "compare" instead of "explore"
             pairs = determine_matching(criteria1, criteria2, group1, group2)
             n_comparisons = len(pairs) 
         else:
@@ -401,7 +403,7 @@ class Manager(object):
                 pairs = [k for k,v in overlap.items() if v == 0]
                 n_comparisons = len(pairs)
         
-        # There may be a way to make this faster by just looping through one group and comparing that hypervector to every single one in group 2 at once (or in a few sub sets) (like in the pariwise_similarity function), but there would need to be a different way to get the attribute overlap (and create the correct "overall" vector) for each pair.
+        # There may be a way to make this faster by just looping through one group and comparing that hypervector to every single one in group 2 at once (or in a few sub sets) (like in the pariwise_similarity function), but there would need to be a different way to get the attribute overlap (and create the correct "overall" vector) for each pair. (As-is, this is actually pretty fast, it's the steps before this that take more processing time)
         # actually make the comparisons
         STATUS["progress"] = 0
         STATUS[operation]["similarity"] = []
@@ -449,7 +451,7 @@ class Manager(object):
             return HVs
             
         
-    def view_distribution(self, subgroup:list=[], attributes:list=None) -> dict: #TODO: remove =========================================================================================
+    def view_distribution(self, subgroup:list=[], attributes:list=None) -> dict: #TODO: remove 
         """
         Get the distributions of the attributes for a subgroup. If attributes is None, get all attributes.
         """

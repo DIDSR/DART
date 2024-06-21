@@ -1,4 +1,179 @@
 
+/* || Custom Classes */
+
+const DistributionViewTemplate = document.createElement("template");
+
+DistributionViewTemplate.innerHTML = `
+    <style>
+        :host {
+            display: inline-block;
+            min-width: 30px;
+            min-height: 30px;
+            border: 2px dashed red;
+        }
+        
+    </style>
+    <slot name="title">No title</slot>
+    <slot name="view-select"></slot>
+    <slot name="view">No views added</slot>
+`;
+const distributionViewOptions = {
+    "Pie Chart": "pie-chart",
+    "Bar Chart": "bar-chart-v",
+}
+
+class DistributionView extends HTMLElement {
+    constructor() { 
+        super();
+        this.attachShadow( {mode: "open"} );
+        this.shadowRoot.appendChild(DistributionViewTemplate.content.cloneNode(true));
+        this.select = document.createElement("select");
+        this.dist = null;
+    }
+    
+    connectedCallback() {
+        // set up the select
+        this.select.setAttribute("slot", "view-select");
+        this.getCurrentView = this.getCurrentView.bind(this);
+        this.select.setAttribute("onchange", "this.parentElement.getCurrentView()");
+        this.appendChild(this.select);
+        for (var o in distributionViewOptions) {
+            var opt = document.createElement("option");
+            opt.value = distributionViewOptions[o];
+            opt.innerText = o;
+            this.select.appendChild(opt);
+        }
+        this.getCurrentView();
+        
+    }
+    static get observedAttributes() { return ['distribution-data'] }
+    
+    attributeChangedCallback(att, oldVal, newVal) {
+        // remove any existing distribution views
+        var existing = this.querySelectorAll("[slot='view']");
+        for (var e of existing) { this.removeChild(e) };
+        // set the distribution (convert to percent)
+        this.dist = JSON.parse(newVal);
+        var total = Object.values(this.dist).reduce((partialSum,a) => partialSum+a, 0);
+        this.dist = Object.entries(this.dist).map( x => [x[0], (x[1]/total)*100]);
+        this.dist = Object.fromEntries(this.dist);
+        // generate the current view
+        this.getCurrentView();
+    }
+    
+    getCurrentView() {
+        // determine the correct view from the select
+        var currentView = this.select.value;
+        if (this.dist == null || !currentView) { return }
+        // create the distribution view
+        var view = document.createElement(currentView);
+        view.setAttribute("slot", "view");
+        view.setAttribute("distribution", JSON.stringify(this.dist));
+        this.appendChild(view);
+        
+        
+    } 
+}
+
+customElements.define("distribution-view", DistributionView);
+
+const PieChartTemplate = document.createElement("template");
+PieChartTemplate.innerHTML = `
+    <style>
+    :host {
+        min-width: 20px;
+        min-height: 20px;
+        border: 2px solid cyan;
+        display: block;
+    }
+    
+    :host[hidden] { display:none }
+    </style>
+    <svg xmlns="http://www.w3.org/2000/svg" width=100 height=100>
+        <defs>
+            <slot name="def"></slot>
+        </defs>
+        <slot name="object"></slot>
+    </svg>
+`;
+class PieChart extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow( {mode: "open"} );
+        this.shadowRoot.appendChild(PieChartTemplate.content.cloneNode(true));
+    }
+    
+    static get observedAttributes() { return ['distribution', 'color-key'] }
+    
+    connectedCallback() { this.createChart() }
+    
+    createChart() {
+        const data = JSON.parse(this.getAttribute("distribution"));
+        var pal = getComputedStyle(this).getPropertyValue("--current-palette") || "red, green";
+        var colorKey = this.getAttribute("color-key");
+        if (!colorKey) {
+            colorKey = {};
+            var counter = 0;
+            for (let att in data) {
+                colorKey[att] = counter;
+                counter++;
+            }
+        }
+        console.log(pal, colorKey, colorKey.length);
+        const rad = 40;
+        var angle = -90;
+        const N = 4; // number of points to use
+        var center = [50,50];
+        const colors = new ColorMap(pal);
+        
+        // distribution is in percent
+        for (let att in data) {
+            var a = 360*(data[att]/100);
+            var points = [center];
+            for (i = 0; i <= N; i++) {
+                points.push(getCoord(...center, rad*1.4, angle+(a/N)*i));
+            }
+            angle = angle + a;
+        
+        var id = makeid();
+        var clip = svgElement("clipPath");
+            clip.setAttribute("id",id);
+            clip.setAttribute("slot", "def")
+            this.appendChild(clip);
+        var poly = svgElement("polygon")
+            poly.setAttribute("points", points);
+            clip.appendChild(poly);
+        
+        var n = colors.getCat(colorKey[att], Object.keys(colorKey).length);
+        var c = svgElement("circle");
+            c.setAttribute("cx", center[0]);
+            c.setAttribute("cy", center[1]);
+            c.setAttribute("r", rad);
+            c.classList.add("dist-element");
+            c.classList.add("apply-palette");
+            c.setAttribute("palette", n);
+            
+            c.setAttribute("clip-path", `url(#${id})`);
+            c.setAttribute("slot", "object");
+            
+            this.appendChild(c);
+            
+        var title = svgElement("title");
+            title.textContent = `${att} ${(data[att]).toFixed(2)}%`; // 2 decimal places
+            c.appendChild(title);
+            
+        }
+    }
+    
+    
+}
+
+customElements.define("pie-chart", PieChart);
+
+
+/* || Functions */
+
+
 function makeDistViewSection(attribute, key, div_id, includeType=false) {
     if (div_id) {
         var root = document.getElementById(div_id);
@@ -46,10 +221,9 @@ function createDistViewIfEmpty(attribute, div_id) {
         var data = fromStorage(div.getAttribute("data-key"));
         var distview = createDistributionView(attribute, data, null, div_id, true);
         div.appendChild(distview);
+        
     }
 }
-
-
 
 
 

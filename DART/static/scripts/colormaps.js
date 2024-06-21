@@ -36,7 +36,8 @@ function colorToRGB(color) {
 }
 
 function applyColormap() {
-    var elements = document.getElementsByClassName("colormapped");
+    var elements = [...document.getElementsByClassName("colormapped")];
+    elements = elements.concat([...document.querySelectorAll("[apply-colormap]")]);
     for (i = 0; i < elements.length; i++) {
         var elem = elements[i];
         var cmap = getComputedStyle(elem).getPropertyValue("--current-colormap");

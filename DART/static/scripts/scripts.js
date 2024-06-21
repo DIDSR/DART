@@ -97,7 +97,56 @@ function isEquiv(x, y) {
     return JSON.stringify(x) == JSON.stringify(y);
 }
 
+/**
+ * Makes a random identifier
+ * @param {number} [length=10] - the length of the identifier
+ * @returns {string} - a random identifier
+ */
+function makeid(length=10) {
+    let result = '';
+    const characters = 'abcdefghijklmnopqrstuvwxyz';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
 
+
+/* || Formatting */
+
+/**
+ * Adjust the number of decimals displayed to the specified amount
+ */
+function adjustDecimalCount() {
+    var nDec = Number(localStorage.getItem("decimal-count"));
+    // get the elements to adjust
+    var elements = document.querySelectorAll('[configure-decimals]');
+    for (var e of elements) {
+        var n = Number(e.innerText);
+        if (n) { e.innerText = n.toFixed(nDec) };
+    }
+}
+
+
+/**
+ * Format a subgroup name from an object (dictionary) into a nicer string format
+ **/
+function formatSubgroupName(obj) { // TODO: have other format options? Display names
+    obj = JSON.stringify(obj);
+    obj = obj.replace(/[{"}]/g, "");
+    /*if (obj.split(",").length > 1) { // The "and" formatting messes up with binned numeric values
+        obj = obj.split(",");
+        var last = obj[obj.length-1]
+        last = " and " + last;
+        obj[obj.length-1] = last;
+        obj = obj.slice(0, obj.length-1).join(", ") + last;
+    }*/
+    obj = obj.split(",").join(", ")
+    return obj;
+}
 
 
 /* Unsorted */
@@ -135,8 +184,23 @@ function initPage() {
         var cpal = "red-yellow-green-blue"; // TODO default
     }
     updateColorPalette(cpal);
+    
+    // Decimal management // TODO: make this a proper setting
+    var nDec = Number(localStorage.getItem("decimal-count")) || 3;
+    localStorage.setItem("decimal-count", nDec); // ensure it's set in local storage
+    //// create the event listener to update decimals
+    document.body.addEventListener("update-decimals", event => {
+        adjustDecimalCount();
+    });
 }
 
+/**
+ * Fire the events needed to update colormap and decimals
+ */
+function updatePage() {
+    fireCustomEvent("update-decimals");
+    fireCustomEvent("update-cmap");
+}
 
 
 /* show/hide sections by id */

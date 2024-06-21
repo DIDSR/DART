@@ -24,4 +24,9 @@
             <button type="submit" name="selected-database" class="database-select" value="create-new">Create a new database</button>
         </form>
     </div>
+    
+    <!-- clear session storage when switching databases -->
+    <script type='text/javascript'>
+        window.sessionStorage.clear();
+    </script>
 {% endblock %}

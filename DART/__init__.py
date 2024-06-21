@@ -75,6 +75,8 @@ def create_app() -> Flask: # Main function -------------------------------------
     @app.route("/", methods=["GET", "POST"])
     def load():
         """ Create a new database or load an existing one """
+        global status
+        status = {} # reset status when switching databases
         if request.method == "POST":
             if request.form["selected-database"] == "create-new": # TODO
                 return redirect(url_for("new"))

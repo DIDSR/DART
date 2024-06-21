@@ -88,8 +88,11 @@ function createFilterSection(operation, removeFilterOptions=[]) {
             
             data["requested-operation"] = operation;
             let request = new XMLHttpRequest();
-                request.open("POST", "form-data");
-                request.send(JSON.stringify(data));
+            request.open("POST", "form-data");
+            request.send(JSON.stringify(data));
+            
+            // save the information to the sessionStorage
+            toStorage(`filter-${operation}`, data);
                 
             fireCustomEvent("job-submitted");
         });

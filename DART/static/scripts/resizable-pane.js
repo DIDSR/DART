@@ -37,11 +37,12 @@ resizePaneTemplate.innerHTML = `
                 min-height: 10px;
                 position: relative;
                 overflow: hidden;
+                display: inline-block;
             }
         :host([resize~="right"]) { padding-right: var(--bar-size) !important }
         :host([resize~="left"]) { padding-left: var(--bar-size) !important }
-        :host([resize~="top"]) { padding-right: var(--bar-size) !important }
-        :host([resize~="bottom"]) { padding-right: var(--bar-size) !important }
+        :host([resize~="top"]) { padding-top: var(--bar-size) !important }
+        :host([resize~="bottom"]) { padding-bottom: var(--bar-size) !important }
         :host([hidden]) { display: none }
         
         resize-bar {
@@ -58,6 +59,7 @@ resizePaneTemplate.innerHTML = `
         resize-bar:is([side=right], [side=left]) { cursor: ew-resize }
         resize-bar:is([side=top], [side=bottom]) { cursor: ns-resize }
         resize-bar:hover { transform: scale(2) } 
+        
     </style>
     <slot></slot>
 `;
