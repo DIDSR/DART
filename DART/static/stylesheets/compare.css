@@ -1,0 +1,86 @@
+body {
+    --header-height: 50px;
+    --subpage-selection-height: 20px;
+}
+
+#pageheader > tool-tip {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+#pageheader {
+    border: 4px outset var(--accent-1, blue);
+    position: relative;
+    margin: 10px;
+    height: var(--header-height);
+}
+
+
+#pageheader > h1 {
+    text-align: center;
+}
+
+/* Subpage Select -- TODO: move to be applicable to explore as well */
+
+#subpage-selection {
+    background-color: var(--accent-1);
+    display: flex;
+    height: var(--subpage-selection-height);
+}
+#subpage-selection > div {
+    font-size: large;
+    flex-grow: 1;
+    text-align: center;
+    transition: flex-grow 0.5s;
+}
+
+#subpage-selection > div[active] {
+    background-color: var(--accent-2);
+    flex-grow: 2;
+}
+
+#subpage-selection > div:hover {
+    background-color: var(--hover-selection);
+}
+
+/* Subpage display -- TODO: move to be applicable to explore as well */
+
+.subpage {
+     /* flex-grow: 1; */
+    /* set the level page to exactly fill the remaining height */
+    height: calc( 100vh - var(--header-height) - var(--subpage-selection-height) - var(--status-bar-height) - 20px);
+    overflow: hidden;
+}
+
+
+/* ||| Detail view */
+.detail-view-header {
+    border-bottom: 2px solid var(--alt-background);
+}
+.detail-view-header > * {
+}
+.detail-view-header > * {
+    text-align: center;
+}
+.detail-view-header > :first-child {
+    font-weight: bold;
+}
+.detail-view-subgroup-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+.detail-view-subgroup-display > * {
+    border: 2px solid var(--alt-background);
+    border-radius: 5px;
+    min-width: 150px;
+}
+.detail-view-subgroup-display > * > * {
+    border: 1px solid var(--alt-background);
+}
+.detail-view-subgroup-display [emph] {
+    background-color: var(--alt-background);
+}
+
+

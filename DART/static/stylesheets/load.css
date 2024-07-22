@@ -1,0 +1,80 @@
+
+#loading-background {
+    min-width: 100vw;
+    min-height: 100vh;
+    background-color: var(--background-color, red);
+    position: fixed;
+    left: 0;
+    top: 0;
+    --main-height: 50px;
+}
+
+
+#main-loading {
+    position: absolute;
+    height: var(--main-height);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Center */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#loading-details {
+    position: absolute;
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    /* Center below the main loading */
+    left: 50%;
+    top: calc(50% + calc( 0.5*var(--main-height) ) );
+    transform: translate(-50%);
+}
+#loading-indicator {
+    color: var(--accent-1);
+}
+#loading-indicator:not([errored]):not([complete]) {
+    animation: rotating 2s linear infinite;
+    
+}
+#loading-indicator::before {
+    content: "loop";
+}
+#loading-indicator[errored] {
+    color: red;
+}
+#loading-indicator[errored]::before {
+    content: "error";
+}
+#loading-indicator[complete]::before {
+    content: "done";
+}
+
+#main-loading > progress {
+    min-width: 300px;
+    width: 700px;
+    max-width: 70vw;
+}
+
+/* Status indicators */
+#loading-details > * {
+    height: 24px;
+    line-height: 24px;
+}
+.progress-indicator[status=not-started]::before {
+    content: "pending";
+}
+.progress-indicator[status=complete]::before {
+    content: "check_circle";
+}
+.progress-indicator[status=error]::before {
+    content: "cancel";
+}
+
+.progress-indicator[status=complete] {
+    color: var(--accent-1, lime);
+}
+.progress-indicator[status=error] {
+    color: red;
+}

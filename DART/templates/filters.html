@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block headcontent %}
+    <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/filters.css')}}">
+    <script src="{{ url_for('static', filename='scripts/categorical-select.js')}}"></script>
+    <script src="{{ url_for('static', filename='scripts/double-range.js')}}"></script>
+    <script src="{{ url_for('static', filename='scripts/filters.js')}}"></script>
+    {% block head %}
+    {% endblock %}
+{% endblock %}
+
+{% block pagecontent %}
+    {% block above_filter %}
+    {% endblock %}
+      
+    
+
+    <div id=filter-subpage class=subpage>
+        <form id=criteria-filter-form>
+        <!-- Declare which subgroups to use during filtering -->
+        <categorical-select id=attribute-selection>
+            <span slot=title> Filter by: </span>
+            <button type=button slot=selection-control onclick="selectAll('attribute-selection'); updateFilterSection()">Select All</button>
+            <button type=button slot=selection-control onclick="deselectAll('attribute-selection'); updateFilterSection()">Deselect All</button>
+            
+            {% for att in attributes %}
+                <categorical-option>
+                    <input slot=cb type=checkbox value={{att.name}} name=filter-by id=filter-by-{{loop.index}} onchange="updateFilterSection()"></input>
+                    <label slot=label for=filter-by-{{loop.index}}>{{att.name}}</label>
+                </categorical-option>
+            {% endfor %}
+        </categorical-select>
+        
+        {% for att in attributes %}
+            {% set outer_loop = loop %}
+            <collapsible-section linked-checkbox=filter-by-{{loop.index}}>
+                <span slot=header> {{ att.name }} </span>
+                <div class=attribute-options>
+                    {% for sub in ["Subgroup 1", "Subgroup 2"] %}
+                        {% set sub_loop = loop %}
+                        {% if att.kind == 'categorical' %}
+                            <categorical-select id=attribute-filter-{{outer_loop.index}}-{{sub_loop.index}}>
+                            <span slot=title> {{sub}} </span>
+                            <button type=button slot=selection-control onclick=selectAll("attribute-filter-{{outer_loop.index}}-{{sub_loop.index}}")>Select All</button>
+                            <button type=button slot=selection-control onclick=deselectAll("attribute-filter-{{outer_loop.index}}-{{sub_loop.index}}")>Deselect All</button>
+                            {% for v in att.values %}
+                                {% set inner_loop = loop %}
+                                <categorical-option>
+                                    <input slot=cb type=checkbox value={{v}} name="selection|{{sub}}|{{att.name}}" id=selection-{{sub_loop.index}}-{{outer_loop.index}}-{{inner_loop.index}}></input>
+                                    <label slot=label for=selection-{{sub_loop.index}}-{{outer_loop.index}}-{{inner_loop.index}}>
+                                        {{v}}
+                                    </label>
+                                </categorical-option>
+                                
+                            {% endfor %}
+                            </categorical-select> 
+                        {% elif att.kind == 'numeric' %}
+                        
+                           <span>
+                               <span> {{sub}} </span>
+                               <!-- TODO: import step! -->
+                               <double-range min={{att.values|min}} max={{att.values|max}} name="selection|{{sub}}|{{att.name}}"></double-range>
+                           </span>
+                                               
+                        {% endif %}
+                        
+                    {% endfor %}
+                    
+                </div>
+            </collapsible-section>
+            
+        {% endfor %}
+        
+        
+        
+        <categorical-select id=optional-attribute-selection>
+            <span slot=title> Attributes which may be used to define intersectional subgroups: </span>
+            <button type=button slot=selection-control onclick="selectAll('optional-attribute-selection'); updateFilterSection()">Select All</button>
+            <button type=button slot=selection-control onclick="deselectAll('optional-attribute-selection'); updateFilterSection()">Deselect All</button>
+            
+            {% for att in attributes %}
+                <categorical-option>
+                    <input slot=cb type=checkbox checked value={{att.name}} name=optional-att id=optional-att-{{loop.index}} onchange="updateFilterSection()"></input>
+                    <label slot=label for=optional-att-{{loop.index}}>{{att.name}}</label>
+                </categorical-option>
+            {% endfor %}
+        </categorical-select>   
+        
+        <div class=additional-filter>
+            <label for=levels_allowed>Levels of intersectionality:</label> 
+            <double-range id=intersectionality-levels-input min=0 max={{attributes|length-1}} step=1 name="levels-allowed"></double-range>
+        </div> 
+        
+        <categorical-select id=similarity-attribute-selection>
+            <span slot=title> Calculate similarity using: </span>
+            <button type=button slot=selection-control onclick="selectAll('similarity-attribute-selection'); updateFilterSection()">Select All</button>
+            <button type=button slot=selection-control onclick="deselectAll('similarity-attribute-selection'); updateFilterSection()">Deselect All</button>
+            
+            {% for att in attributes %}
+                <categorical-option>
+                    <input slot=cb type=checkbox checked value={{att.name}} name=similarity-att id=similarity-att-{{loop.index}}></input>
+                    <label slot=label for=similarity-att-{{loop.index}}>{{att.name}}</label>
+                </categorical-option>
+            {% endfor %}
+        </categorical-select>    
+    
+    
+        <button type=submit id=filter-submit-button>Apply Filters</button>
+        </form>
+    </div>
+    
+    <!-- Filtered Subgroup Information! [WIP] -->
+    <div id=subgroups-subpage class=subpage hidden>
+        <collapsible-section hidden>
+        <h2 slot=header>Applied Filters</h2>
+        <table id=filter-info>
+        <tr>
+            <th colspan=2> Subgroup 1</th>
+            <th colspan=2> Subgroup 2</th>
+        </tr>
+        <tr>
+            <td bold center> Attribute </td>
+            <td bold center> Allowed Values </td>
+            <td bold center> Attribute </td>
+            <td bold center> Allowed Values </td>
+        </tr>
+        </table>
+    
+    </collapsible-section>
+    <collapsible-section >
+        <h2 slot=header>Selected Subgroups</h2>
+        <div id=subgroup-lists>
+            {% for sub in ["Subgroup 1", "Subgroup 2"] %}
+                <table id="{{sub}}-list">
+                    <tr>
+                        <th> {{sub}} </th>
+                    </tr>
+                </table>
+            {% endfor %}
+        
+        </div>
+        
+    </collapsible-section>
+    </div>
+    
+    
+    <script type="text/javascript">
+        updateFilterSection();
+    </script>
+    
+    {% block below_filter %}
+    {% endblock %}
+
+{% endblock %}

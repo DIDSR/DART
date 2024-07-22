@@ -1,200 +1,260 @@
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
 from pathlib import Path
-import pandas as pd
-import math
+import tempfile
+import dill
 import json
 
-from .HDCmanager import Manager
 
-status = {}
+from .dataset_details import get_dataset_details
+from .processing import filter_processing, run_similarity
 
+"""
+situational_config = {
+    # config that is just used for passing information (name: default)
+    "uploaded-file":None,
+    "creation-stage": 0,
+    "attributes":{},
+}
+from flask import current_app
+def reset_config():
+    for k,v in situational_config.items():
+        current_app.config[k] = v
 
-
-def extract_file_information(filepath):
-    filepath = Path(filepath.lstrip("\"").rstrip("\""))
-    assert filepath.exists() # TODO: better error handling
-    info = {}
-    print(filepath)
-    df = pd.read_csv(filepath) # TODO: other file types
-    if len(df.columns) == 1: # DEBUG -> some csvs actually save as tsvs
-        df = pd.read_csv(filepath, sep="\t")
-    for col in df.columns:
-        info[col] = df[col].unique().tolist()  
-      
-    return info
-
-def process_database_creation_input(form):
-    id_col = None if form["id-col"] == "None" else form["id-col"]
-    attributes = {att:{} for att in form.getlist("attribute-column") if att != id_col}
-    for att in attributes:
-        attributes[att]["type"] = form[f"column-{att}-type"]
-        if attributes[att]["type"] == "categorical":
-            attributes[att]["options"] = form.getlist(f"column-{att}-option")
-        elif attributes[att]["type"] == "numeric":
-            items = {k.replace(f"column-{att}-",""):v for k,v in form.items() if k.startswith(f"column-{att}-") and not k.endswith("type")}
-            for k, v in items.items():
-                try:
-                    attributes[att][k] = float(v) 
-                except:
-                    attributes[att][k] = None
-        
+def process_creation_forms(req: request):
+    stage = req.form["stage"]
+    #print(current_app.config['temp-dir'])
+    if  stage == "file-upload":
+        # save as a temp file -> read the information
+        uploaded_file = request.files["file"]
+        #ext = Path(uploaded_file.filename).suffix
+        current_app.config['uploaded-file'] = uploaded_file
     
-    database_name = form["database-name"] if len(form["database-name"]) > 0 else "Unnamed Database"
-    return {"attributes":attributes, "id_col":id_col, "name":database_name}
-    
-def get_attribute_information(attributes):
-    out = {
-        att.name:{
-            "display-name":str(att),
-            "type":att.type,
-            "options":att.options if att.type == "categorical" else "None",
-            "min":str(att.min) if hasattr(att,"min") else "None",
-            "max":str(att.max) if hasattr(att,"max") else "None",
-            "step":str(att.step) if hasattr(att,"step") else "None",
-        } for att in attributes
-    }
-    return out
-    
-    
-def detect_databases(dir): # TODO: better detection
-    assert dir.is_dir()
-    pickles = [file for file in dir.iterdir() if file.suffix == ".pickle"]
-    return [file.stem for file in pickles if file.with_suffix(".db").exists()]
+    if stage != current_app.config["database-creation-stages"][-1]: 
+        current_app.config["creation-stage"] += 1
+"""      
+
+def load_dataset(app):
+    # connect
+    with open(app.config['current-memory-file'], 'rb') as f:
+        app.config['current-memory'] = dill.load(f)
+    app.config["dataset-loading-status"]["dataset-connected"] = True
+    # get database and distribution details
+    with app.app_context():
+        with app.config['current-memory'].memory_context():
+            app.config['dataset-details'], app.config["distribution-details"] = get_dataset_details()
+    app.config['dataset-loading-status']['details-loaded'] = True;
+    # done
+    return
 
 
-def create_app() -> Flask: # Main function ------------------------------------------------------------------------------------------------------------
-    from .HDCmanager import Manager
+# MAIN APP ======================================================================================================
+
+
+
+def create_app() -> Flask:
     app = Flask(__name__)
     
-    # TODO: load config from file (allow non-default values)
-    app.config["LOCALDIR"] = Path(__file__).parent.parent / Path("example_data")
-    app.config["DATABASES"] = detect_databases(app.config["LOCALDIR"])
-    app.config["ACTIVE"] = None
+    app.config["DEMO"] = True # TODO: cli command toggle (following flask docs doesnt seem to work)
     
+    app.config["dataset-loading-status"] = {
+        "dataset-connected": False,
+        "details-loaded": False,
+    }
+    
+    app.config["filters"] = {
+        "compare":{},
+        "explore":{},
+    }
+    app.config["subgroups"] = {
+        "compare":{},
+        "explore":{},
+    }
+    app.config["results"] = {
+        "compare":{},
+        "explore":{},
+    }
+    app.config["basecriteria"] = {
+        "compare":{},
+        "explore":{},
+    }
+    app.config["dataset-directories"] = [
+        Path(__file__).parent.parent / Path("localdata"),
+    ]
+    app.config["database-creation-stages"] = ["file-upload", "attribute-configuration"]
+    
+    app.config['current-memory-file'] = None
+    app.config['current-memory'] = None
+    app.config['dataset-details'] = {} 
+    app.config["distribution-details"] = {}
+    app.config['creation-stage'] = 0
+    
+    app.config['current-memory-file'] = app.config['dataset-directories'][0] / Path('test_dataset.pkl') # DEBUG
+    
+    _job_tracker = {};
+    
+    if app.config['current-memory-file']:
+        with open(app.config['current-memory-file'], 'rb') as f:
+            app.config['current-memory'] = dill.load(f)
+    
+    available_dataset_files = {
+        x.stem:x for y in app.config["dataset-directories"] for x in y.iterdir()
+    }
+    
+    
+    # || Home page =====================================================
     @app.route("/", methods=["GET", "POST"])
-    def load():
-        """ Create a new database or load an existing one """
-        global status
-        status = {} # reset status when switching databases
+    def home():
+        """
+        with app.app_context():
+            reset_config()   # reset the portions of config related to current dataset
+        """
         if request.method == "POST":
-            if request.form["selected-database"] == "create-new": # TODO
-                return redirect(url_for("new"))
-            app.config["ACTIVE"] = request.form["selected-database"]
-            return redirect(url_for("details"))
-        return render_template("select_database.html", databases=app.config["DATABASES"])
+            if "navigate-to" in request.form:
+                return redirect(request.form["navigate-to"])
+            elif "action" in request.form and request.form['action'] == 'dataset-selection':
+                # select the current database 
+                app.config["current-memory-file"] = available_dataset_files[request.form['selection']]
+                # Go to a loading screen (while loading the dataset information)
+                return redirect("/loading")
+                with open(app.config['current-memory-file'], 'rb') as f:
+                    app.config['current-memory'] = dill.load(f)
+                return redirect("/details")
+        return render_template('home.html', datasets=available_dataset_files, access_dataset= bool(app.config["current-memory-file"]), demo=app.config["DEMO"])
         
-        
-    @app.route("/new", methods=["GET","POST"])
-    def new():
-        """ Create a new database """
+    # || Loading Screen ===========================================================
+    @app.route("/loading", methods=["GET","POST"])
+    def load_content():
         if request.method == "POST":
-            if "filepath" in request.form:
-                app.config["INPUT_DATAFILE"] = request.form["filepath"].lstrip("\"").rstrip("\"")
-                file_information = extract_file_information(request.form["filepath"])
-                return render_template("new_database.html", file_information = file_information)
-            elif "database-creation-complete" in request.form:
-                app.config["DB_CREATION_ARGS"] = process_database_creation_input(request.form)
-                print(app.config["DB_CREATION_ARGS"])
-                return redirect(url_for("process_database_creation"))
-            
-        return render_template("new_database.html")
+            if "navigate-to" in request.form:
+                return redirect(request.form["navigate-to"])
         
+        # set the app loading
+        load_dataset(app)
+        return render_template('load.html', datasets=available_dataset_files, access_dataset=bool(app.config["current-memory-file"]), demo=app.config["DEMO"])
     
-    @app.route("/initializing", methods=["GET"])
-    def process_database_creation(): 
-        """ Runs while the database is being created"""
-        if not set(["INPUT_DATAFILE","DB_CREATION_ARGS"]).issubset(set(app.config)):
-            return redirect(url_for("new"))
-        M = Manager(**app.config["DB_CREATION_ARGS"], data_file=app.config["INPUT_DATAFILE"],save_location=app.config["LOCALDIR"])
-        app.config["DATABASES"].append(M.name)
-        app.config["ACTIVE"] = M.name
-        return redirect(url_for("details"))
-        #return render_template("progressbar.html", loading_message="Intializing database...") -> TODO (if needed) show progress bar while the database initializes
-        
-        
-    @app.route("/status", methods=["GET"])
-    def getStatus():
-        """ Transfer status and information from python to javascript """
-        global status
-        statusList = status
-        return json.dumps(statusList)
-        
-        
-    @app.route("/database/details", methods=["GET","POST"])
-    def details():
-        """ "landing page" for the database -> shows a high-level overview """
-        if not app.config["ACTIVE"]: # somehow got to this page w/o an active database
-            return redirect(url_for("load"))
+    
+    
+    
+    
+    # || New dataset creation/upload ==============================================
+    @app.route("/new", methods=["GET","POST"])
+    def new_dataset_creation():
         if request.method == "POST":
             if "navigate-to" in request.form:
-                return redirect(url_for(request.form["navigate-to"]))
-        database_pickle_file = app.config["LOCALDIR"] / Path(app.config["ACTIVE"] + ".pickle")
-        # TODO: pull more information from the database file
-        # TODO: make sure that it only tries to load the database once (not every time this page it loaded)
-        app.config["DB"] = Manager.from_file(database_pickle_file)
+                return redirect(request.form["navigate-to"])
+        """
+        if "creation-stage" not in app.config:
+            return redirect("/")
+        
+        if request.method == "POST":
+            with app.app_context():
+                process_creation_forms(request)
+            
         return render_template(
-            "database_details.html", 
-            database_name=app.config["ACTIVE"], 
-            distribution_information=app.config["DB"].get_group_distributions(), 
-            attribute_information=app.config["DB"].attribute_information
+            'add_new_dataset.html', 
+            stage=app.config["database-creation-stages"][app.config["creation-stage"]],
+            all_stages=app.config["database-creation-stages"],
+            attributes=app.config["attributes"],
         )
+        """
+        return "Not Yet Implemented :("
         
         
-    @app.route("/database/compare", methods=["GET","POST"]) # TODO: update to use the same style of form as explore
-    def compare(): 
-        """ Compare two user-specified subgroups """
-        global status
-        if not app.config["ACTIVE"]:
-            return redirect(url_for("load"))
+    # Working within a dataset ======================================================================
+    ## View High-level Dataset Details --------------------------------------------------------------
+    @app.route("/details", methods=["GET", "POST"])
+    def details():
         if request.method == "POST":
             if "navigate-to" in request.form:
-                return redirect(url_for(request.form["navigate-to"]))
-        return render_template("database_compare.html", database_name=app.config["ACTIVE"], attribute_information=get_attribute_information(app.config["DB"].attributes), status=status)
+                return redirect(request.form["navigate-to"])
+        '''
+        if not app.config['dataset-details']:
+            with app.app_context():
+                with app.config['current-memory'].memory_context():
+                    app.config['dataset-details'], app.config["distribution-details"] = get_dataset_details()
+        '''
         
+        return render_template('dataset_details.html', **app.config['dataset-details'], access_dataset= bool(app.config["current-memory-file"]), demo=app.config["DEMO"])
         
-    @app.route("/database/explore", methods=["GET","POST"])
-    def explore():  
-        """ Comparison of many different subgroups """
-        if not app.config["ACTIVE"]: 
-            return redirect(url_for("load"))
+    ## Compare two specific subgroups / populations --------------------------------------------------
+    @app.route("/compare", methods=["GET", "POST"])
+    def compare():
         if request.method == "POST":
             if "navigate-to" in request.form:
-                return redirect(url_for(request.form["navigate-to"]))
-        return render_template("database_explore.html", database_name=app.config["ACTIVE"],  groups=2, attribute_information=get_attribute_information(app.config["DB"].attributes))
-
-
-    @app.route("/database/form-data", methods=["POST"])
-    def fetchFormData():
-        """ Manages formdata transfer -> allows processsing w/o reloading page """
+                return redirect(request.form["navigate-to"])
+        if not app.config['dataset-details']: # should already have details, but get them in case
+            with app.app_context():
+                with app.config['current-memory'].memory_context():
+                    app.config['dataset-details'], app.config["distribution-details"] = get_dataset_details()
+        
+        
+        return render_template(
+            "compare.html", 
+            access_dataset=bool(app.config["current-memory-file"]),
+            attributes=app.config['dataset-details']['attributes'],
+            demo=app.config["DEMO"])
+        
+    ## Backend -> communication between python and javascript ------------------------------
+    
+    @app.route("/loading-status")
+    def loading_status():
+        return json.dumps(app.config["dataset-loading-status"])
+    
+    @app.route("/get-dataset-details")
+    def get_dataset_details():
+        return json.dumps(app.config['dataset-details'])
+        
+    @app.route("/get-idx-attributes")
+    def get_subgroup_distributions():
+        return json.dumps(app.config["distribution-details"]);
+        
+    _job_functions = {
+        "filter_processing": filter_processing,
+        "similarity_calculation": run_similarity,
+    }
+    
+    @app.route("/job-progress", methods=["GET", "POST"])
+    def job_progress_tracking():
         if request.method == "POST":
-            data = request.get_json(force=True)
-            if data['requested-operation'] == 'explore':
-                t = Thread(
-                    target=app.config["DB"].explore,
-                    kwargs = dict(
-                        operation = "explore",
-                        group1=data["1"],
-                        group2=data["2"],
-                        ensure_matching=True,
-                        compare_attributes=data["similarity-attributes"],
-                        STATUS=status,
-                    ),
+            assert "_job_id" in request.form
+            assert "_job_type" in request.form
+            assert "_page_name" in request.form
+            assert request.form["_job_type"] in _job_functions
+            # create the thread
+            t = Thread(
+                target = _job_functions[request.form["_job_type"]],
+                kwargs= dict(
+                    app = app,
+                    formData = request.form,
                 )
-                t.start()
-            elif data['requested-operation'] == 'compare':
-                t = Thread(
-                    target=app.config["DB"].explore,
-                    kwargs = dict(
-                        operation = "compare",
-                        group1=data["1"],
-                        group2=data["2"],
-                        compare_attributes=data["similarity-attributes"],
-                        ensure_matching=True,
-                        STATUS=status,
-                    ),
-                )
-                t.start()
-        return data
-
+            )
+            # Submit the job
+            t.start()
+            _job_tracker[request.form["_job_id"]] = t
+        # Check the thread progress for each job
+        _job_status = {job_id:"running" if thread.is_alive() else "idle" for (job_id, thread) in _job_tracker.items()}
+        return json.dumps(_job_status)
+    
+    @app.route("/<pageName>-<dtype>", methods=["GET"])
+    def view_data(pageName, dtype):
+        if dtype not in app.config:
+            return f"Unrecognized data request: {dtype}"
+        if pageName not in app.config[dtype]:
+            return f"Unrecognized page name: {pageName}"
+        if dtype == "subgroups":
+            out = {}
+            for sub, lst in app.config[dtype][pageName].items():
+                out[sub] = [ {k:v for (k,v) in x.items() if k!='hypervector'} for x in lst]
+            return json.dumps(out)
+        else:
+            return json.dumps(app.config[dtype][pageName])
+    
+        
     return app
+
+
+
+
+
+

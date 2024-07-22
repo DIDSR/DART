@@ -1,31 +1,135 @@
-<!doctype html>
-<html>
+<!DOCTYPE HTML>
+<html status=loading>
     <head>
-        <title> DART </title>
-        <!-- Icon from  https://free-icons.github.io/free-icons/ -->
-        <link rel="shortcut icon" href="{{ url_for('static', filename='bullseye-arrow.ico') }}">
-        
+        <title>DART</title>
+        <!-- Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <!-- Style sheets -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/themes.css') }}" title=themes>
-        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/style.css') }}">
-        
-        <!-- Script Files -->
-        <script src="{{ url_for('static', filename='scripts/scripts.js') }}"></script>
-        <script src="{{ url_for('static', filename='scripts/colormaps.js') }}"></script>
-        <script src="{{ url_for('static', filename='scripts/visuals.js') }}"></script>
-        <script src="{{ url_for('static', filename='scripts/resizable-pane.js') }}"></script>
-        <script src="{{ url_for('static', filename='scripts/tabbed-pane.js') }}"></script>
-        
+        <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/style.css')}}">
+        <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/figures.css')}}">
+        <!-- Scripts -->
+        <script src="{{ url_for('static', filename='scripts/scripts.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/menus.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/color-settings.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/collapsible-section.js')}}"></script>
+        <!--<script src="{{ url_for('static', filename='scripts/distribution-view.js')}}"></script>-->
+        <script src="{{ url_for('static', filename='scripts/figures.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/tool-tip.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/multi-page-tutorial.js')}}"></script>
         {% block headcontent %}
         {% endblock %}
     </head>
-    <body>
-        {% block pagecontent %}
-        {% endblock %}
+    <body >
+    
+        <!-- Page Navigation (Side Bar) -->
+        <form id=navigation-bar method=post>
+            <input name=navigate-to hidden></input>
+            <div id=expand-button onclick="document.getElementById('navigation-bar').toggleAttribute('collapsed')">
+                <span class=material-icons-outlined id=expand-icon ></span>
+            </div>
+            <div class=menu-select page=/ onclick="pageNavigation(this)">
+                <span class=material-icons-outlined>home</span>
+                <span>Home</span>
+            </div> 
+            {% if not demo %}
+                <div class=menu-select page=/new onclick="pageNavigation(this)">
+                    <span class=material-icons-outlined>add</span>
+                    <span>New</span>
+                </div> 
+            {% endif %}
+            <div class=menu-select page=/details onclick="pageNavigation(this)">
+                <span class=material-icons-outlined>analytics</span>
+                <span>Details</span>
+            </div>  
+            <div class=menu-select page=/compare onclick="pageNavigation(this)">
+                <span class=material-icons-outlined>compare_arrows</span>
+                <span>Compare</span>
+            </div> 
+            <div class=menu-select page=/explore onclick="pageNavigation(this)" hidden> <!-- TODO -->
+                <span class=material-icons-outlined>explore</span>
+                <span>Explore</span>
+            </div> 
+            <div class=menu-filler></div>
+            <div class=menu-select page=help onclick=showMenu("help")>
+                <span class=material-icons-outlined>help_outline</span>
+                <span>Help</span>
+            </div>  
+            <div class=menu-select page=settings onclick=showMenu("settings")>
+                <span class=material-icons-outlined>settings</span>
+                <span>Settings</span>
+            </div>   
+            
+        </form>
+        <!-- App Status (Bottom Bar) -->
+        <div id=status-bar>
+            <span class=material-icons-outlined id=status-icon></span>
+            <span id=status-text></span>
+        </div>
+        <!-- Specific Page Content -->
+        <div id=page-content-wrapper>
+            <div id=page-content>
+                {% block pagecontent %}
+                {% endblock %}
+            </div>
+        </div>
+        
+        <!-- Menu Haze -->
+        <div id=menu-haze hidden></div>
+        <!-- Settings Menu -->
+        <div id=settings-menu class=menu hidden>
+            <span class="material-icons-outlined close-menu-icon" onclick=closeMenu('settings')>close</span>
+            <div class=menu-bar>
+                <div class=menu-title>
+                    Settings
+                </div>
+                <div class=menu-select onclick=switchMenuPage(this,"settings","colors") active-selection>
+                    <span class=material-icons-outlined>palette</span>
+                    <span> Colors </span>
+                </div>
+            </div>
+            <div id=colors-page class=menu-page>
+                <span class=toggle-preview-outlines>
+                <div id=categorical-color-selection>
+                    <div class=section-heading> 
+                        <span>Categorical Color Palette </span>
+                        <span onclick=toggleColorPreviewOutlines(this)>
+                            <span class="material-icons-outlined toggle"></span>
+                            <span> Outline Previews </span>
+                        </span>
+                    </div>
+                    <select onchange=changeColorPalette("categorical",this)>
+                    </select>
+                    
+                    <input type=number min=1 max=20 step=1 id=categorical-color-preview-count value=3 onchange=setCategoricalOptions()>
+                    <label for=categorical-color-preview-count>Preview Categories:</label>
+                    <div class=color-preview id=categorical-color-preview>
+                    </div>
+                </div>
+                <div id=continuous-color-selection>
+                    <div class=section-heading> 
+                        <span>Continuous Color Palette </span>
+                        <span onclick=toggleColorPreviewOutlines(this)>
+                            <span class="material-icons-outlined toggle"></span>
+                            <span> Outline Preview </span>
+                        </span>
+                    </div>
+                    <select onchange=changeColorPalette("continuous",this)>
+                    </select>
+                    <div class=color-preview id=continuous-color-preview>
+                        <div class=colorbar-horizontal></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- DEBUG (?) -->
+    <script type='text/javascript'>
+        initSettingsMenu();
+    </script>
+        
     </body>
-    <script type="text/javascript">
-        initPage();
-        applyColormap();
+    
+    <script type='text/javascript'>
+        initPage(accessDataset="{{access_dataset}}");
     </script>
 </html>

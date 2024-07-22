@@ -1,0 +1,70 @@
+/* Contains styles specific to the home page */
+
+
+/* || Overall Formatting */
+
+#page-content { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#page-content > * {
+    display: inline-block;
+    flex-grow: 0;
+    min-width: 80%;
+}
+
+#page-content > * > * {
+    text-align: center;
+}
+/* || Title Block */
+#title-block {
+    --title-font-size: 30px;
+    --subtitle-font-size: 24px;
+    border: 10px outset var(--accent-1);
+    padding: 10px;
+    margin: 30px 0px;
+}
+
+#title-block > :first-child {
+    font-size: var(--title-font-size);
+    color: var(--accent-2);
+    font-weight: bold;
+}
+#title-block > :last-child {
+    font-size: var(--subtitle-font-size);
+    color: var(--accent-1);
+}
+
+#title-block .emph {
+    font-size: calc(var(--subtitle-font-size) * 1.1);
+    color: var(--accent-2);
+    font-weight: bold;
+}
+
+/* || Selection Block */
+#dataset-selection {
+    border: 5px double var(--accent-1);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+}
+
+#dataset-selection > :first-child {
+    font-size: 20px;
+    color: var(--accent-2);
+    font-weight: bold;
+    border-bottom: 2px solid var(--accent-1);
+    margin-bottom: 5px;
+}
+
+#dataset-selection > :not(:first-child) {
+    margin: 5px 10%;
+}
+#dataset-selection > :last-child {
+    margin-bottom: 10px;
+}
+
+

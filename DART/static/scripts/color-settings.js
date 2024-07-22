@@ -1,4 +1,5 @@
 
+/* || Utilities */
 
 class Color {
     constructor(color) {
@@ -35,95 +36,24 @@ function colorToRGB(color) {
     return rgbValue;
 }
 
-function applyColormap() {
-    var elements = [...document.getElementsByClassName("colormapped")];
-    elements = elements.concat([...document.querySelectorAll("[apply-colormap]")]);
-    for (i = 0; i < elements.length; i++) {
-        var elem = elements[i];
-        var cmap = getComputedStyle(elem).getPropertyValue("--current-colormap");
-        var colors = cmap.split(", ");
-        var colormap = new ColorMap(colors);
-        var color = colormap.getColor(elem.getAttribute("colormap-value"));
-        elem.style.backgroundColor = color; // TODO: set any other style?
-        // calcluate color brightness -> set color to have enough contrast
-        var lum = luminance(color);
-        // todo: see if the threshold is good
-        if (lum < 0.5) {
-            elem.style.color = "white";
-        } else {
-            elem.style.color = "black";
-        }
-    } 
-}
-
-function applyPalette() { // ====================================
-    // deal with the svg elements
-    
-    var SVGs = document.querySelectorAll("svg")
-    var palette = getComputedStyle(document.body).getPropertyValue("--current-palette");
-    var palette = new ColorMap(palette);
-    
-    /*
-    for (svg of SVGs) {
-        var elements = Object.values(svg.children).filter(function(x) {return x.classList.contains("apply-palette")}); 
-        for (e of elements) {
-            var val = e.getAttribute("palette");
-            var color = palette.getCat(val, elements.length);
-            e.setAttribute("fill", color);
-        }
+/**
+ * makes a categorical color palette
+ * @constructor
+ */
+function makeColorPalette(colors, values) {
+    const CM = new ContinuousColorMap(colors, 0, 1);
+    var palette = {};
+    for (var i in values) {
+        palette[values[i]] = CM.getCat(i, values.length);
     }
-    */
-    // get the elements
-    var elements = document.getElementsByClassName("apply-palette");
-    
-    for (e of elements) {
-        var val = e.getAttribute("palette");
-        var max = e.getAttribute("max");
-        var color = palette.getCat(val, max);
-        if (e instanceof SVGElement) {
-            // set fill of svgs
-            e.setAttribute("fill", color);
-            
-        } else {
-            // set the background color of html elements
-            e.style.backgroundColor = color;
-        }
-    
-    }
-    
-}
-class optionColorPalette {
-    constructor(attribute) {
-        var options = fromStorage("attribute-information")[attribute]["values"];
-        var cpCount = 0;
-        this.mapping = {};
-        for (var opt in options) {
-            this.mapping[opt] = cpCount;
-            cpCount++;
-        }
-        this.length = Object.keys(this.mapping).length;
-    }
-    
-    get(option) {
-        
-        // get the color for n option
-        var out = this.mapping[option];
-        if (!out && numReg.test(option)) { // numeric options -> number of decimals is likely off
-            for (var opt in this.mapping) {
-                if (Number(option) == Number(opt)) {
-                    out = this.mapping[opt];
-                    break;
-                }
-            }
-        }
-        return out;
-    }
-
+    return palette;
 }
 
 
-class ColorMap {
-    constructor(input_colors) {
+class ContinuousColorMap {
+    constructor(input_colors, minValue=0, maxValue=1) {
+        this.minValue = minValue;
+        this.maxValue = maxValue;
         if (typeof input_colors == "string") {
             input_colors = input_colors.split(", ");
         }
@@ -170,8 +100,8 @@ class ColorMap {
     
     getColor(value) {
         // clip the color into the accepted range
-        value = Math.max(value, 0);
-        value = Math.min(value, 1);
+        value = Math.max(value, this.minValue);
+        value = Math.min(value, this.maxValue);
         // get the lower and upper bounds
         var lower = this.placements.filter( function(x) { return x <= value });
             lower = Math.max(...lower);
@@ -196,25 +126,65 @@ class ColorMap {
     }
 }
 
+/* || Color Palette / Maps application and management */
 
 
+/*
+ * Sets up color sets for each of the dataset attributes
+ */
+function configureColorSets() {
+    const config = JSON.parse(sessionStorage.getItem("database_attribute_configuration"));
+    const colors = getComputedStyle(document.documentElement).getPropertyValue("--current-cat-colors");
+    var colorSets = {};
+    for (var att in config) {
+        const cp = makeColorPalette(colors, config[att]["values"]);
+        colorSets[att] = cp;
+    }
+    // Create a dummy set for the settings menu preview
+    // create a dummy color set
+    const c = document.getElementById("categorical-color-preview-count") 
+    if (c) {
+        colorSets["_color_preview_set"] = makeColorPalette(colors, [...Array(Number(c.value)).keys()]);
+    }
+    sessionStorage.setItem("attribute_color_sets", JSON.stringify(colorSets));
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*
+ * Applies colormap/color sets to all indicated elements
+ */
+function applyColorPalette() {
+    // get all indicated elements
+    const elements = document.querySelectorAll("[colormapped]");
+    const colorSets = JSON.parse(sessionStorage.getItem("attribute_color_sets"));
+    const CM = new ContinuousColorMap(getComputedStyle(document.documentElement).getPropertyValue("--current-cont-colors"));
+    for (var e of elements) {
+        var color = null;
+        if (e.hasAttribute("color-set")) {
+            // applying a categorical palette
+            const csName = e.getAttribute("color-set");
+            if (!(colorSets[csName])) {
+                console.warn("No color set with the name:", csName);
+                continue;
+            }
+            color = colorSets[csName][e.getAttribute("color-value")];
+        } else {
+            // applying a continuous palette
+            color = CM.getColor(e.getAttribute("color-value"));
+        }
+        if (e instanceof SVGElement) {
+            // update fill colors of svg elements
+            e.setAttribute("fill", color);
+        } else {
+            // update background color of html elements
+            e.style.backgroundColor = color;
+            if (luminance(color) < 0.5) { // TODO: luminance threshold
+                e.style.color = "white";
+            } else {
+                e.style.color = "black";
+            }
+        }
+        
+    }
+}
 

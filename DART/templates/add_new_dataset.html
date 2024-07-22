@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block pagecontent %}
+    <form id=creation-stage-tracker>
+        {% for s in all_stages %}
+            {% if s == stage %}
+                <button current-selection type=button>{{ s }}</button>
+            {% else %}
+                <button type=button>{{ s }}</button>
+            {% endif %}
+        {% endfor %}
+    </form>
+    <h1> New dataset creation page </h1>
+    
+    <form id={{stage}} method=post enctype="multipart/form-data">
+    <input type=hidden name=stage value={{stage}}></input>
+    {% if stage == 'file-upload' %}
+        <input type=file name=file>    
+    {% elif stage == 'attribute-configuration' %}
+        att-conf
+    {% endif %}
+    <input type=submit></input>
+    </form>
+    
+{% endblock %}

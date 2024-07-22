@@ -1,0 +1,71 @@
+
+/* || Individual Figures & Titles */
+
+.figure-wrapper {
+    --figure-title-size: 16px;
+    --figure-max-height: 1000px;
+    --figure-max-width: 2000px;
+    --figure-min-height: 200px;
+    --figure-min-width: 100px;
+}
+
+.figure-wrapper > svg { /* the figures themselves */
+    min-width: var(--figure-min-width);
+    max-width: var(--figure-max-width);
+    min-height: var(--figure-min-height);
+    max-height: var(--figure-max-height);
+    display: block;
+    
+    margin: 2px;
+    /* center */
+    left: 50%;
+    transform: translate(-50%);
+    position: relative;
+}
+.figure-wrapper .plot-title {
+    font-size: var(--figure-title-size);
+    font-weight: bold;
+    display: block;
+    text-align: center;
+}
+
+.plot-element[highlight] {
+    border: 1px solid var(--figure-highlight-color, cyan);
+    stroke: var(--figure-highlight-color, cyan);
+    stroke-width: 2px;
+}
+
+/* || Legends */
+figure-legend,
+.figure-legend {
+    border: 3px solid var(--alt-background, black);
+    padding: 5px;
+    border-radius: 10px;
+    --legend-title-size: 18px;
+}
+
+.legend-entry {
+    --legend-entry-height: 30px;
+    --legend-padding: 4px;
+    height: var(--legend-entry-height);
+    padding: var(--legend-padding);
+}
+
+.legend-entry[highlight] {
+    background-color: var(--figure-highlight-color, cyan); /* TODO */
+}
+.legend-entry > * {
+    display: inline-block;
+    height: calc( var(--legend-entry-height) - calc(2*var(--legend-padding)) );
+    position: relative;
+    vertical-align: middle;
+}
+.legend-entry-color {
+    width: 30px;
+    border: 2px solid black;
+}
+
+.legend-entry-label {
+    padding-left: 3px;
+    line-height: calc( var(--legend-entry-height) - calc(2*var(--legend-padding)) );
+}

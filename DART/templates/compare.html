@@ -1,0 +1,32 @@
+{% extends 'filters.html' %}
+
+{% block head %}
+    <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/compare.css')}}">
+    <script src="{{ url_for('static', filename='scripts/compare.js')}}"></script>
+    <script src="{{ url_for('static', filename='scripts/level-view.js')}}"></script>
+{% endblock %}
+
+{% block above_filter %}
+    
+        <div id=pageheader>
+            <tool-tip show=left hidden>
+                <!-- WIP Tooltip display -->
+                To Do
+            </tool-tip>  
+            <h1> Compare </h1>
+        </div>
+        
+        <div id=subpage-selection>
+            <div value=filter-subpage onclick=switchSubpage(this) active> Filters </div>
+            <div value=subgroups-subpage onclick=switchSubpage(this) hidden> Subgroups </div> <!-- TODO -->
+            <div value=results-subpage onclick=switchSubpage(this)> Results </div> 
+        </div>
+    
+
+    
+{% endblock %}
+
+{% block below_filter %}
+    <level-view id=results-subpage class=subpage hidden>
+    </level-view>
+{% endblock %}

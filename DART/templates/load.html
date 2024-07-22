@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- needed information typically gotten from base.html -->
+        <title>DART</title>
+        <!-- Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!-- Style sheets -->
+        <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/style.css')}}">
+        <!-- Scripts -->
+        <script src="{{ url_for('static', filename='scripts/scripts.js')}}"></script>
+        <script src="{{ url_for('static', filename='scripts/color-settings.js')}}"></script>
+        <!-- Custom for loading page -->
+        <link rel=stylesheet href="{{ url_for('static', filename='stylesheets/load.css')}}">
+        <script src="{{ url_for('static', filename='scripts/load.js')}}"></script>
+    </head>
+    
+    <body>
+        <div id=loading-background>
+            <div id=main-loading>
+                <span class=material-icons-outlined id=loading-indicator></span>
+                <br>
+                <progress max=1 value=0></progress>
+            </div>
+            <div id=loading-details hidden>
+                <span status=not-started class="progress-indicator material-icons-outlined" id=dataset-connected-indicator></span><span>Dataset connected</span>
+                <span status=not-started class="progress-indicator material-icons-outlined" id=details-loaded-indicator></span><span>Details loaded</span>
+                <span status=not-started class="progress-indicator material-icons-outlined" id=store-attributes-indicator></span><span>Attributes stored</span>
+                <span status=not-started class="progress-indicator material-icons-outlined" id=create-colorpalettes-indicator></span><span>Color palettes created</span>
+            </div>
+            <form hidden method=post> <!-- triggered by javascript to move to the next page when complete -->
+                <input name=navigate-to value=/details></input>
+            </form>
+        </div>
+    </body>
+    
+    <script type="text/javascript">
+        loadDatasetInformation();
+    </script>
+
+</html>

@@ -1,400 +1,297 @@
 
-/* || Element creation utilities */
 
-/**
- * Creates an HTML checkbox input
- * @constructor
- * @param {string} name - the name assigned to the checkbox
- * @param {(string|number)} - the value assigned to the checkbox
- */
-function checkBox(name, value) {
-    // create a checkbox element
-    var cb = document.createElement("input");
-        cb.setAttribute("type", "checkbox");
-        cb.classList.add("checkbox");
-        cb.setAttribute("name", name);
-        cb.value = value;
-    return cb;
-}
-
-/* || HTML Utilities */
-
-function extractChildren(element, criteria={}, excludeCriteria, extracted=[]) { // TODO: I think that this can be replaced with HTMLElement.querySelectorAll(*args)
-    var meetsCriteria = true;
-    for (key in criteria) {
-        if (!meetsCriteria) {
-            break;
-        }
-        if (key == "class") {
-            meetsCriteria = element.classList.contains(criteria[key]);
-        } else {
-            meetsCriteria = element.getAttribute(key) == criteria[key];
-        }
-        
+function initPage(accessDataset) {
+    /* Set the Theme */
+    const currentTheme = localStorage.getItem("current-theme") || "default";
+    setTheme(currentTheme);
+    /* Set config information */
+    setConfig();
+    /* Manage Active/Disabled Pages */
+    setActivePage();
+    if (accessDataset == "False") {
+        setDisabledNavigation();
     }
-    for (key in excludeCriteria) {
-        if (!meetsCriteria) {
-            break;
-        }
-        if (key == "class") {
-            meetsCriteria = !element.classList.contains(excludeCriteria[key]);
-        } else {
-            meetsCriteria = element.getAttribute(key) != excludeCriteria[key];
-        }
-    }
-    if (meetsCriteria) {
-        extracted.push(element);
-    }
-    if (element.children) {
-        for (child of element.children) {
-            extracted = extractChildren(child, criteria, excludeCriteria, extracted);
-        }
-    }
-    return extracted;
-}
-
-/**
- * Collapse a table by clicking on its heading row
- * @param {HTMLElement} table - the table to collapse
- * @param {bool} [linkCollapse=false] - for tables contained w/in another table: click to collapse all tables in the row
- */
-function collapseTable(table, linkCollapse=false) {
-    // 
-    var rows = table.rows;
     
-    if (linkCollapse) {
-        // collapse all of the tables in the same row
-        var rowTables = table.parentElement.parentElement.querySelectorAll("table")
-        for (table of rowTables) {
-            collapseTable(table, false);
-        }
-    } else {
-
-        if (table.classList.contains("collapsed")) {
-            table.classList.remove("collapsed");
-            for (ri = 1; ri < rows.length; ri++) {
-                rows[ri].classList.remove("hidden");
-            }
-        } else {
-            table.classList.add("collapsed");
-            for (ri = 1; ri < rows.length; ri++) {
-                rows[ri].classList.add("hidden");
-            }
-        }
+    /* Page-specific initialization procedures */
+    const page = window.location.pathname; // page name including leading "/"
+    if (["/compare","/explore"].includes(page)) {
+        initializeFilterSection();
+        setSubpage();
     }
-}
-
-
-/* || General Utilities */
-
-/**
- * Check if two objects are the same
- * @param {object} x - one of the objects to compare
- * @param {object} y - the other object to compare
- * @returns {bool} object equivalence
- */
-function isEquiv(x, y) {
-    return JSON.stringify(x) == JSON.stringify(y);
-}
-
-/**
- * Makes a random identifier
- * @param {number} [length=10] - the length of the identifier
- * @returns {string} - a random identifier
- */
-function makeid(length=10) {
-    let result = '';
-    const characters = 'abcdefghijklmnopqrstuvwxyz';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-}
-
-
-/* || Formatting */
-
-/**
- * Adjust the number of decimals displayed to the specified amount
- */
-function adjustDecimalCount() {
-    var nDec = Number(localStorage.getItem("decimal-count"));
-    // get the elements to adjust
-    var elements = document.querySelectorAll('[configure-decimals]');
-    for (var e of elements) {
-        var n = Number(e.innerText);
-        if (n) { e.innerText = n.toFixed(nDec) };
-    }
-}
-
-
-/**
- * Format a subgroup name from an object (dictionary) into a nicer string format
- **/
-function formatSubgroupName(obj) { // TODO: have other format options? Display names
-    obj = JSON.stringify(obj);
-    obj = obj.replace(/[{"}]/g, "");
-    /*if (obj.split(",").length > 1) { // The "and" formatting messes up with binned numeric values
-        obj = obj.split(",");
-        var last = obj[obj.length-1]
-        last = " and " + last;
-        obj[obj.length-1] = last;
-        obj = obj.slice(0, obj.length-1).join(", ") + last;
-    }*/
-    obj = obj.split(",").join(", ")
-    return obj;
-}
-
-
-/* Unsorted */
-function isEmpty(element) { // TODO: move to scripts.py
-    return element.childNodes.length < 1;
-}
-
-function initPage() {
-    // set the theme
-    var themeName = localStorage.getItem("theme");
-    if (!themeName) { // no theme set
-        var themeName = "default";
-    }
-    setTheme(themeName);
+    /* Apply colormaps/palettes */
+    applyColorPalette();
+    /* Basic initialization complete */
+    document.documentElement.setAttribute("status", "idle");
+    /* Any deterministic loading */
+    updatePage();
     
-    // set the active page (while in database)
-    var path = window.location.pathname;
-    markActivePage(path);
-    
-    // create an event listener to update colormaps
-    document.body.addEventListener("update-cmap", event => {
-        applyColormap();
-    });
-    
-    // set the colormap
-    var cmap = localStorage.getItem("colormap");
-    if (!cmap) { // no colormap set
-        var cmap = "red-blue" // TODO: default
-    }
-    updateColorMap(cmap);
-    // set the categorical color palette
-    
-    var cpal = localStorage.getItem("palette");
-    if (!cpal) { // no palette set
-        var cpal = "red-yellow-green-blue"; // TODO default
-    }
-    updateColorPalette(cpal);
-    
-    // Decimal management // TODO: make this a proper setting
-    var nDec = Number(localStorage.getItem("decimal-count")) || 3;
-    localStorage.setItem("decimal-count", nDec); // ensure it's set in local storage
-    //// create the event listener to update decimals
-    document.body.addEventListener("update-decimals", event => {
-        adjustDecimalCount();
-    });
 }
 
-/**
- * Fire the events needed to update colormap and decimals
- */
+
+const configDefaults = {
+    "decimal-places": 3,
+}
+function setConfig() { // TODO: make any of these variable?
+    for (var key in configDefaults) {
+        sessionStorage.setItem(key, configDefaults[key]);
+    }
+
+}
+
 function updatePage() {
-    fireCustomEvent("update-decimals");
-    fireCustomEvent("update-cmap");
-}
-
-
-/* show/hide sections by id */
-function toggleShow(id) {
-    var element = document.getElementById(id);
-    if (element.classList.contains("hidden")) {
-        element.classList.remove("hidden");
-    } else {
-        element.classList.add("hidden");
+    // updates portions of the page that change in response to user input or background processes
+    document.documentElement.setAttribute("status", "loading");
+    const page = window.location.pathname; // page name including leading "/"
+    if (["/compare","/explore"].includes(page)) {
+        // updateFilterRelatedSections(); // Still a WIP
+        updateResultsSection();
     }
+    /* Complete */
+    document.documentElement.setAttribute("status", "idle");
 }
 
-/* Collapsible sections */
-function toggleCollapse(element, onOpen, args) {    
-    var target = document.getElementById(element.getAttribute("target"));
-    if (element.classList.contains("collapsed")) {
-        element.classList.remove("collapsed");
-        target.classList.remove("hidden");
-        if (onOpen) { // (optional) trigger function on opening a collapsed section
-            onOpen(...args);        
+/* || Display Settings */
+/*
+ * formats subgroup criteria into a more reader-friendly view
+ * @param {object} criteria - subgroup definition criteria
+ * @param {string} [format=default] - the formatting style to use
+ */
+function formatSubgroupName(criteria, format='default') { // TODO: other formatting styles
+    var display = '';
+    if (format == 'default') {
+        display = Object.entries(criteria).reduce( (str, x) => str + ", " + `${x[0]}: ${x[1]}`, "").slice(2);
+    }
+    return display;
+}
+
+/* || Utilities */
+
+/*
+ * Formats a string to work as a query selector (fixes : characters)
+ * @param {string} input - string to format
+ */
+function formatQuery(input) {
+    return input.replaceAll(":", "\\:");
+}
+
+/*
+ * Rounds a number to AT MOST the number of decimals specified
+ * @param [number] number - the number to be rounded
+ * @param [number] dec - max number of decimal places
+ */
+function round(number, dec) {
+    if (!dec) { 
+        dec = sessionStorage.getItem("decimal-places");
+    }
+    return Math.round((number + Number.EPSILON) * (10**dec)) / (10**dec);
+}
+
+/* || Information Management */
+
+/*
+ * Saves the attribute configuration information to the session storage for use throughout
+ * @param {bool} [force=false] - pass true to set all attribute configurations, regardless of if there is already a configuration saved
+ */
+function setAttributeConfigurations(force=false) { // TODO: reset on database switch
+    const elements = document.getElementsByClassName("attribute-configuration-information");
+    var config = JSON.parse(sessionStorage.getItem("database_attribute_configuration")) || {};
+    var anyChange = false;
+    for (const e of elements) {
+        if (!(config[e.getAttribute("name")]) || (force)) {
+            anyChange = true;
+            const info = namedTupleToObject(e.getAttribute("information"));
+            config[e.getAttribute("name")] = info;
         }
-    } else {
-        element.classList.add("collapsed");
-        target.classList.add("hidden");
+    }
+    sessionStorage.setItem("database_attribute_configuration", JSON.stringify(config));
+    if (anyChange) {
+        configureColorSets();
     }
 }
 
-function collapseIcon() {
-    var icon = document.createElement("i");
-        icon.classList.add("collapse-icon");
-        icon.classList.add("material-icons");
-        icon.innerText = "chevron_right";
-    return icon;
+/* || Job Management */
+
+/*
+ * Monitors a specific job (waits for a complete signal from the python backend)
+ * @param {number} name - the job ID to monitor
+ * @param {string} message - the message to show while the job is processing
+ */
+async function monitorJob(name, message, onComplete, onUpdate, updateEvery=1000) {
+    var status = await checkJob(name);
+    var nChecks = 1;
+    while (status === undefined) {
+        // No job by that name is found -> check a few more times to wait for flask to catch up, then exit if no job can be found still.
+        status = await checkJob(name);
+        nChecks++ ;
+        if (nChecks > 5) { // set max checks here (typically only needs one)
+           status = "invalid"; 
+        }
+    }
+    
+    if (status == "invalid") {
+        console.error(`No job could be found with the ID ${name}`);
+        return;
+    } else if (status == "idle") {
+        // update status bar
+        document.documentElement.setAttribute("status", "idle");
+        if (message) {
+            document.getElementById("status-text").innerText = ""; // 
+        }
+        // trigger onUpdate function
+        if (onUpdate) {
+            onUpdate();
+        }
+        // trigger the onComplete function
+        if (onComplete) {
+            onComplete();
+        }
+        return;
+    } else if (status == "running") {
+        // update status bar
+        document.documentElement.setAttribute("status", "running");
+        if (message) {
+            document.getElementById("status-text").innerText = message;
+        }
+        // trigger onUpdate function
+        if (onUpdate) {
+            onUpdate();
+        }
+        // set time out to keep checking
+        timeout = setTimeout(monitorJob, updateEvery, name, message, onComplete, onUpdate, updateEvery);
+    }
 }
 
+/*
+ * Checks job status
+ * @param {number} name - the ID of the job to check
+ */
+async function checkJob(name) {
+    const res =  await fetch("/job-progress");
+    const jobList = await res.json();
+    return jobList[name];
+}
 
+/* || Page Navigation & Management */
 
-/* Theme / Color management (broad applications) */
+function pageNavigation(element) {
+    if (element.hasAttribute("active-selection")) { // already active
+        return; 
+    } 
+    if (element.hasAttribute("disabled")) { // invalid selection
+        return; 
+    }
+    const form = document.getElementById("navigation-bar");
+    const navInput = form.querySelector("input[name='navigate-to']");
+    navInput.value = element.getAttribute("page");
+    form.submit();
+}
+
+/**
+ * Sends the information associated with the element pressed (used to select dataset)
+ * @param {HTMLElement} element - the element clicked
+ */
+function sendSelection(element) {
+    if (element.hasAttribute("disabled")) { // invalid selection
+        return; 
+    }
+    const form = element.parentElement;
+    const input = form.querySelector("input[name='selection']");
+    input.value = element.value;
+    form.submit();
+}
+
+/**
+ * Updates the navigation menu to show the current page
+ */
+function setActivePage() {
+    const activePage = window.location.pathname;
+    const element = document.querySelector(`.menu-select[page="${activePage}"]`)
+    if (element) {
+        element.toggleAttribute("active-selection", true);
+    }
+}
+
+/**
+ * Updates which navigation menu options are disabled
+ */
+function setDisabledNavigation() { // TODO
+    const dis = ["/details", "/compare", "/explore"];
+    for (var page of dis) {
+        const element = document.querySelector(`.menu-select[page="${page}"]`);
+        if (element) {
+            element.toggleAttribute("disabled", true);
+        }
+    }
+}
+
+/* || Theme management */
 
 function setTheme(themeName) {
-    localStorage.setItem("theme", themeName); // localStorage persists between sessions (sessionStorage does not)
-    document.documentElement.className = themeName;
+    document.documentElement.setAttribute("theme", themeName);
 }
 
-function updateColorMap(cmapName) {
-    let root = document.documentElement;
-        root.style.setProperty("--current-colormap", `var(--colormap-${cmapName}`);
-    localStorage.setItem("colormap", cmapName);   
-    fireCustomEvent("update-cmap");  
-}
-
-function updateColorPalette(cmapName) {
-    let root = document.documentElement;
-        root.style.setProperty("--current-palette", `var(--colormap-${cmapName}`);
-    localStorage.setItem("palette", cmapName);    
-}
-
-/* Page management */
-
-function markActivePage(pageName) {
-    // update the buttons on the database config bar to indicate which page the user is on
-    const elements = {
-        "details": document.getElementById("navigate-details-button"),
-        "compare": document.getElementById("navigate-compare-button"),
-        "explore": document.getElementById("navigate-explore-button"),
-    };
-    if (pageName.includes("database")) {
-        for (let p in elements) { // set all to inactive
-            if (elements[p].classList.contains("active")) {
-                elements[p].classList.toggle("active");
-            }
-        }
-        var page = pageName.split("/").pop();
-        elements[page].classList.toggle("active"); // set current to active
+/* || Utilities */
+/**
+ * Converts a python namedtuple (in string form) to a javascript object.
+   Designed specifically with the AttributeConfig namedtuples in mind, 
+   assumes a single list entry (values)
+ * @param {string} namedTuple - python namedtuple in string format
+ */
+function namedTupleToObject(namedTuple) {
+    // Get the tuple content (separate from namedtuple name)
+    var regExp = /\(([^)]+)\)/;
+    var matches = regExp.exec(namedTuple);
+    var info = matches[1].replaceAll("'", "");
+    // Get any information in brackets (lists)
+    regExp = /\[([^)]+)\]/;
+    var bracketed = regExp.exec(info)[0]
+    
+    // change format to avoid issues with separating the different pieces of information
+    info = info.replace(bracketed, bracketed.replaceAll(", ", ","));
+    info = info.split(", ").map( x => x.split("=") );
+    info = Object.fromEntries(info);
+    try {
+        info['values'] = JSON.parse(info['values']);
+    } catch {
+        info['values'] = info['values'].slice(1,info['values'].length-1).split(",");
     }
+    return info;  
 }
 
-/* Event Management */
 
+/* || CHecking if session storage has information -> repeat check if the information is not there (to allow time for background processing) */
 
-function fireCustomEvent(name) {
-    if (!name) {
-        name = "customevent";
+/*
+ * Check if there is a certain key in session storage; if not, repeat check several times (to allow for background processing time)
+ * @param{string} key - the key to check for
+ * @param{string} [subkey=null] - (optional) key to look for in the retrieved information
+ * @param{number} [maxChecks=10] - the maximum number of times to check for the value
+ * @param{checkTimeout=100} - the time (ms) between checks
+ * @param{number} numChecks - the number of checks already occured
+ */
+function checkStorage(key, subkey=null, maxChecks=10, checkTimeout=1000, numChecks=0) {
+    if (numChecks >= maxChecks) {
+        console.log(`Could not find the key "${key} (${subkey})" after ${numChecks} checks`);
+        return false;
     }
-    //console.log("the custom event: ", name, " was fired!");
-    const e = new CustomEvent(name);
-    document.body.dispatchEvent(e);
-}
-
-/* General Utilities */
-function clearChildren(element) {
-    // remove all children from an element
-    for (i = element.children.length-1; i>=0; i--) {
-        element.removeChild(element.children[i]);
+    numChecks++;
+    console.warn(`Checking session storage for the key "${key}"`);
+    var foundKey = true;
+    var res = sessionStorage.getItem(key);
+    
+    if (!res) {
+        foundKey = false;
+    } else if (subkey && !(res[subkey])) {
+        foundKey = false;
     }
-}    
-
-function rtrim(x, characters) {
-    var start = 0;
-    var end = x.length - 1;
-    while (characters.indexOf(x[end]) >= 0) {
-    end -= 1;
-    }
-    return x.substr(0, end + 1);
-}
-
-function ltrim(x, characters) {
-    var start = 0;
-    while (characters.indexOf(x[start]) >= 0) {
-    start += 1;
-    }
-    var end = x.length - 1;
-    return x.substr(start);
-}
-
-function resetStorage() {
-    // Reset local and session storage, trigger a page refresh
-    localStorage.clear();
-    sessionStorage.clear();
-    location.reload();
-}
-
-function toStorage(key, object, storage="session") {
-    if (storage == "session") {
-        sessionStorage[key] = JSON.stringify(object);
-    }
-
-}
-
-function fromStorage(key, storage="session") {
-    if (storage == "session") {
-        if (!sessionStorage[key]) {
-            var item = undefined;
-        } else {
-            var item = JSON.parse(sessionStorage[key]);
-        }
-    }
-    return item;
-}
-
-function isArray(a) {
-    return Object.prototype.toString.apply(a) == '[object Array]';
-}
-
-function toggleClass(element, cls) {
-    if (typeof element == "string") {
-        element = document.getElementById(element);
-    }
-    if (element.classList.contains(cls)) {
-        element.classList.remove(cls);
+    
+    if (foundKey) {
+        console.log(`The key was found after ${numChecks} checks!`);
+        console.log(sessionStorage.getItem(key));
+        return true;
     } else {
-        element.classList.add(cls);
+        // set a timeout to check again
+        console.log("key not found, checking again...");
+        var timeout = setTimeout(checkStorage, checkTimeout, key, subkey, maxChecks, checkTimeout, numChecks);
     }
 }
-
-
-
-/* Create toggle elements */
-
-function createToggle(checkbox, activeText, inactiveText, textSide="left") {
-    // creates an interactive toggle
-    var tog = document.createElement("label");
-        tog.classList.add("toggle");
-    var aText = document.createElement("span");
-        aText.classList.add("active-text");
-        if (activeText) {
-            aText.innerText = activeText;
-        }
-    var iText = document.createElement("span");
-        iText.classList.add("inactive-text");
-        if (inactiveText) {
-            iText.innerText = inactiveText;
-        }
-    var l = document.createElement("i");
-        l.classList.add("material-icons");
-        l.classList.add("icon");
-        
-    if (textSide == "left") { // add text before toggle
-        tog.appendChild(aText);
-        tog.appendChild(iText);
-    }
-        tog.appendChild(checkbox);
-        tog.appendChild(l);
-        
-    if (textSide == "right") {
-        tog.appendChild(aText);
-        tog.appendChild(iText);
-    }
-    return tog;
-}
-
-
-
-
-
-
-
