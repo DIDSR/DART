@@ -81,6 +81,13 @@ def create_app() -> Flask:
     app.config["dataset-directories"] = [
         Path(__file__).parent.parent / Path("localdata"),
     ]
+    
+    if app.config["DEMO"]:
+        app.config["dataset-directories"] = [
+            Path(__file__).parent.parent / Path("localdata") / Path("demos"),
+        ]
+    
+    
     app.config["database-creation-stages"] = ["file-upload", "attribute-configuration"]
     
     app.config['current-memory-file'] = None
@@ -89,7 +96,7 @@ def create_app() -> Flask:
     app.config["distribution-details"] = {}
     app.config['creation-stage'] = 0
     
-    app.config['current-memory-file'] = app.config['dataset-directories'][0] / Path('test_dataset.pkl') # DEBUG
+    app.config['current-memory-file'] = None
     
     _job_tracker = {};
     

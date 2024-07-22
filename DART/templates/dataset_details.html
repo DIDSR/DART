@@ -29,7 +29,7 @@
                     <span class=attribute-number-indicator>{{att.values|length}} values</span>
                 </span>
                 
-                <distribution-figure attribute-name="{{att.name}}" distributions='{{dict.from_keys([(att.name,distributions[att.name])])|tojson}}' legend=right></distribution-figure>
+                <distribution-figure no-figure-title attribute-name="{{att.name}}" distributions='{{dict.from_keys([(att.name,distributions[att.name])])|tojson}}' legend=right></distribution-figure>
             </collapsible-section>
         {% endfor %}
     </div>
