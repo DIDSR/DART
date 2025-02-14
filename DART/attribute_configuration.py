@@ -96,6 +96,7 @@ class BaseConfiguration():
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__config__})"
     
+    
 
 class CategoricalConfiguration(BaseConfiguration, _type="categorical"):
     def __init__(self, 
@@ -365,6 +366,9 @@ class AttributeGroup():
     
     def __iter__(self):
         yield from self._attributes.values()
+    
+    def __len__(self):
+        return len(self._attributes)
 
     def __repr__(self):
         items = {k:v.type for (k,v) in self._attributes.items()}
@@ -388,7 +392,7 @@ def get_default_configuration(
         columns = set([*data.columns]).difference(set(exclude_columns))
         if include_columns is not None:
             columns = columns.intersection(set(include_columns))
-        data_list = [data[col] for col in data.columns]
+        data_list = [data[col] for col in columns]
     elif isinstance(data, pd.Series):
         data_list = [data]
     else:
