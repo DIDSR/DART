@@ -20,7 +20,7 @@ class BaseHypervectorSet():
             dimensions=parameters["hypervectors.dimensions"],
             vsa=parameters["hypervectors.architecture"]
         )
-        pass
+        
         
     def __init_subclass__(cls, _type:str):
         cls._type = _type
@@ -60,7 +60,7 @@ class BaseHypervectorSet():
             yield (key, self[key])
     
     def __len__(self):
-        return len(self.basis.shape[0])
+        return self.basis.shape[0]
     
     def match(self, hypervector:torch.Tensor, return_similarity:bool=False):
         """ Returns the key of the value with the highest similarity. """
