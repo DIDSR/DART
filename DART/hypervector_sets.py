@@ -55,7 +55,19 @@ class BaseHypervectorSet():
     
     def __len__(self):
         return len(self.basis.shape[0])
-
+    
+    def match(self, hypervector:torch.Tensor, return_similarity:bool=False):
+        """ Returns the key of the value with the highest similarity. """
+        sim = torchhd.cosine_similarity(self._basis, hypervector)
+        sim = torch.squeeze(sim)
+        if len(sim.shape) == 0: # for HypervectorSets with only one item
+            sim = torch.unsqueeze(sim, dim=0)
+        idx = sim.argmax().item()
+        if return_similarity:
+            return self._keys[idx], sim[idx].item()
+        else:
+            return self._keys[idx]
+        
 
 class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
     def __init__(self, config:CategoricalConfiguration):
