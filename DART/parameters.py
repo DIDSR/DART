@@ -4,11 +4,12 @@ __all__ = [
 
 from collections.abc import MutableMapping
 import pprint
-import os
 
 class Parameters(MutableMapping, dict):
     default = {
-        "numeric.ideal_bin_size": [5,10],
+        "numeric.ideal_bin_count": [5,10],
+        "hypervectors.dimensions": 10000,
+        "hypervectors.architecture": "MAP",
     }
 
     def __init__(self, **kwargs):
@@ -42,7 +43,7 @@ class Parameters(MutableMapping, dict):
     def __repr__(self):
         class_name = self.__class__.__name__
         indent = len(class_name) + 1
-        repr = ('\n' + ' '*indent).join(pprint.pformat(dict(self), indent=1, width=min(os.get_terminal_size().columns, 80) - indent).split("\n"))
+        repr = ('\n' + ' '*indent).join(pprint.pformat(dict(self), indent=1, width=80 - indent).split("\n"))
         return f"{class_name}({repr})"
 
 parameters = Parameters() # the global instance
