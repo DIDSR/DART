@@ -17,11 +17,11 @@ This is done by encoding attribute (metadata) information into hypervectors (hig
    - [x] Attribute Types (configuration)
      - [x] Categorical
      - [x] Numeric
-   - [ ] Encode Attributes into Basis Hypervector Sets
+   - [x] Encode Attributes into Basis Hypervector Sets
      - [ ] Validate expected similarities
-   - [ ] Encode samples into single hypervectors
+   - [x] Encode samples into single hypervectors
      - [ ] Validate extract correct values
-   - [ ] Encode *all* samples into single representative dataset hypervector
+   - [x] Encode *all* samples into single representative dataset hypervector
      - [ ] Validate extract sample information
  - [ ] **Comparison**
    - [ ] Receive user comparison request (file/dictionary)

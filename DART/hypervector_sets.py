@@ -2,10 +2,11 @@ __all__ = [
     "HypervectorSet",
 ]
 
+import pandas as pd
 import torch
 import torchhd
 
-from .attribute_configuration import BaseConfiguration, CategoricalConfiguration, NumericConfiguration
+from .attribute_configuration import *
 from .parameters import parameters
 
 class BaseHypervectorSet():
@@ -70,6 +71,15 @@ class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
     def get_index(self, key) -> int:
         assert key in self._key_mapping
         return self._keys.index(self._key_mapping[key])
+    
+    @classmethod
+    def from_values(cls, name, values):
+        """ Used as a shortcut for creating _role and _chunk hypervector sets. """
+        config = CategoricalConfiguration(name, values)
+        self = cls.__new__(cls)
+        self.__init__(config)
+        return self
+
 
 class NumericHypervectorSet(BaseHypervectorSet, _type="numeric"):
     def __init__(self, config:NumericConfiguration):
@@ -83,12 +93,16 @@ class NumericHypervectorSet(BaseHypervectorSet, _type="numeric"):
         )
     
     def get_index(self, key) -> int:
-        assert key in self._key_mapping
+        if key not in self._key_mapping:
+            raise Exception(f"Unsupported value \"{key}\", must be one of: {self._key_mapping}")
+        # assert key in self._key_mapping
         return self._keys.index(self._key_mapping[key])
+
 
 
 def HypervectorSet(config:BaseConfiguration) -> BaseHypervectorSet:
     """ Creates a hypervector set of the appropriate type. """
     assert config.type in BaseHypervectorSet.subclasses # TODO: improve error handling
     return BaseHypervectorSet.subclasses[config.type](config)
+
 
