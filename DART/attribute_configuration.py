@@ -364,7 +364,7 @@ class AttributeGroup():
         self._attributes[name] = new_configuration
     
     def __iter__(self):
-        yield from self._attributes.keys()
+        yield from self._attributes.values()
 
     def __repr__(self):
         items = {k:v.type for (k,v) in self._attributes.items()}
