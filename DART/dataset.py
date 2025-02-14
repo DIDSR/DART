@@ -11,6 +11,7 @@ import torchhd
 from .attribute_configuration import AttributeGroup
 from .hypervector_sets import HypervectorSet, CategoricalHypervectorSet
 from .parameters import parameters
+from . import validation
 
 
 class Dataset():
@@ -24,6 +25,8 @@ class Dataset():
         }
         self._n_samples = len(samples)
         # encode the samples into a dataset hypervector
+        if parameters["validate.sample_encoding"]:
+            print("Validating sample encoding during dataset encoding process...")
         self._HV = None
         for ii, row in samples.iterrows():
             chunk = int(ii/parameters["hypervectors.dimensions"])
@@ -33,7 +36,11 @@ class Dataset():
                 for att in self.attributes
             ]
             sample_HV = reduce(torchhd.bundle, components)
-            # TODO: optional validation that the original sample attributes can be queried out of the sample hypervector
+            if parameters["validate.sample_encoding"]:# TODO: optional validation that the original sample attributes can be queried out of the sample hypervector
+                expected = {att: row[att] for att in self.attributes}
+                valid = validation.sample_encoding(sample_HV, self, expected)
+                assert valid # TODO: improved error handling
+                
             sample_HV = torchhd.bind(
                 self._basis["_chunk"][str(chunk)],
                 sample_HV
@@ -43,6 +50,8 @@ class Dataset():
                 self._HV = sample_HV
             else:
                 self._HV = torchhd.bundle(self._HV, sample_HV)
+        if parameters["validate.sample_encoding"]:
+            print("No validation errors encountered during sample encoding")
         # TODO: optional validation to check that all original samples' attributes can be queried out of the dataset hypervector
 
     @property
@@ -66,9 +75,11 @@ class Dataset():
         for i in range(len(self)):
             yield self[i]
     
-    def query(self, hypervector=torch.Tensor, attributes:list=None):
+    def query(self, hypervector=torch.Tensor, attributes:list|str=None):
         if attributes is None:
             attributes = [*self.attributes]
+        elif isinstance(attributes, str):
+            attributes = [attributes]
         assert all([att in self.attributes for att in attributes]) # TODO: improve error handling
         result = {}
         for att in attributes:

@@ -39,6 +39,12 @@ class BaseHypervectorSet():
             return None
         return self._basis
     
+    @property
+    def key_mapping(self):
+        if not hasattr(self, "_key_mapping"):
+            return {k:[k] for k in self.keys()}
+        return self._key_mapping
+
     def keys(self):
         yield from self._keys
 
@@ -67,6 +73,16 @@ class BaseHypervectorSet():
             return self._keys[idx], sim[idx].item()
         else:
             return self._keys[idx]
+    
+    def is_matching_value(self, *values) -> bool:
+        assert len(values) == 2 # TODO: better error handling
+        if values[0] == values[1]:
+            return True
+        for idx, v in enumerate(values):
+            other = values[abs(1-idx)]
+            if v in self.key_mapping:
+                return self.key_mapping[v] == other
+        return False            
         
 
 class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
