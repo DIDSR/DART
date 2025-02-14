@@ -75,11 +75,13 @@ class Dataset():
         for i in range(len(self)):
             yield self[i]
     
-    def query(self, hypervector=torch.Tensor, attributes:list|str=None):
+    def query(self, hypervector=torch.Tensor|int, attributes:list|str=None):
         if attributes is None:
             attributes = [*self.attributes]
         elif isinstance(attributes, str):
             attributes = [attributes]
+        if isinstance(hypervector, int):
+            hypervector = self[hypervector]
         assert all([att in self.attributes for att in attributes]) # TODO: improve error handling
         result = {}
         for att in attributes:
