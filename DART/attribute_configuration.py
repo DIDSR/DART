@@ -1,4 +1,5 @@
 __all__ = [
+    "BaseConfiguration",
     "CategoricalConfiguration",
     "NumericConfiguration",
     "AttributeGroup",
@@ -377,12 +378,16 @@ class AttributeGroup():
         repr = ('\n' + ' '*indent).join(pprint.pformat(items, indent=1, width=80-indent).split("\n"))
         return f"{class_name}({repr})"
     
+    def __getitem__(self, key):
+        return self._attributes[key]
+    
 
 
 def get_default_configuration(
         data:pd.Series|pd.DataFrame, 
         include_columns:list=None, 
         exclude_columns:list=[],
+        drop_missing:bool=True, # NOTE: currently things downstream only work if missing is dropped!
     ) -> list[BaseConfiguration]:
     """ 
     Determines the type of a provided data series (single attribute) based on the values provided, 
@@ -392,8 +397,18 @@ def get_default_configuration(
         columns = set([*data.columns]).difference(set(exclude_columns))
         if include_columns is not None:
             columns = columns.intersection(set(include_columns))
+        if drop_missing:
+            L = len(data)
+            data.dropna(axis="index", subset=columns, inplace=True)
+            if L != len(data):
+                print(f"Removing samples with missing values reduced the size of the dataset from {L} to {len(data)}")
         data_list = [data[col] for col in columns]
     elif isinstance(data, pd.Series):
+        if drop_missing:
+            L = len(data)
+            data.dropna(inplace=True)
+            if L != len(data):
+                print(f"Removing samples with missing values reduced the size of the dataset from {L} to {len(data)}")
         data_list = [data]
     else:
         raise Exception(f"Unsupported data format {data.__class__.__name__}; must be pandas.Series or pandas.DataFrame.")
