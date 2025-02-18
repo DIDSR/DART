@@ -6,8 +6,6 @@ from collections.abc import Iterable
 from functools import reduce
 from itertools import combinations, product
 import pandas as pd
-import pprint
-import torch
 import torchhd
 from typing import Literal
 

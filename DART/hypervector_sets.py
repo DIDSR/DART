@@ -3,8 +3,7 @@ __all__ = [
     "NumericHypervectorSet",
 ]
 
-from abc import ABC, abstractmethod
-import pandas as pd
+from abc import ABC
 import pprint
 import torch
 import torchhd
