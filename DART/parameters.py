@@ -11,7 +11,6 @@ class Parameters(MutableMapping, dict):
         "numeric.ideal_bin_count": [5,10],
         "hypervectors.dimensions": 10000,
         "hypervectors.architecture": "MAP",
-        "validate.sample_encoding": True, # TODO: default
     }
 
     def __init__(self, **kwargs):
