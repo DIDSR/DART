@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from functools import reduce
 from itertools import combinations, product
 import pandas as pd
+import pprint
 import torchhd
 from typing import Literal
 
@@ -150,4 +151,11 @@ class Dataset():
                 similarity_values[sim_atts] = torchhd.cosine_similarity(HV1, HV2).item()
             comparisons.add(subgroup, similarity_values, False)
         return comparisons
+    
+    def __repr__(self) -> str:
+        class_name = self.__class__.__name__
+        indent = len(class_name) + 1
+        repr = ('\n' + ' '*indent).join(pprint.pformat({"Attributes":self.attributes, "Number of samples": len(self.samples)}, indent=1, width=80 - indent).split("\n"))
+        return f"{class_name}({repr})"
+
         
