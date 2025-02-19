@@ -43,9 +43,12 @@ class Comparison():
     def __getitem__(self, index:int):
         return self.items[index]
     
-    def export(self, orient:Literal["minimal", "maximal"]="minimal") -> dict:
+    def export(self, orient:Literal["minimal", "maximal"]="minimal", include_empty:bool=False) -> dict:
         items = [item.export(orient=orient) for item in self.items]
+        
         if orient == "minimal":
+            if not include_empty:
+                items = [item for item in items if len(item['similarities']) > 0]
             # avoid repeating information that applies to multiple similarity values
             records = {
                 "base_populations": self.criteria,
@@ -98,7 +101,7 @@ class ComparisonItem():
     def export(self, orient:Literal["minimal","maximal"]="minimal") -> dict|list:
         if orient == "minimal":
             records = {
-                "subgroups": self.subgroups,
+                "subgroup": self.subgroup,
                 "comparison_level": self.level,
                 "similarities": self.similarities,
             }

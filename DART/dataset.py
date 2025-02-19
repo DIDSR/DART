@@ -146,6 +146,8 @@ class Dataset():
             # iterate through the similarity attribute combinations
             similarity_values = {}
             for sim_atts in sim_combinations:
+                if len(sim_atts) < 1:
+                    continue
                 HV1 = reduce(torchhd.bundle, [HVs1[att] for att in sim_atts])
                 HV2 = reduce(torchhd.bundle, [HVs2[att] for att in sim_atts])
                 similarity_values[sim_atts] = torchhd.cosine_similarity(HV1, HV2).item()
