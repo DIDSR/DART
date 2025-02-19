@@ -1,4 +1,5 @@
 __all__ = [
+    "HypervectorSet",
     "CategoricalHypervectorSet",
     "NumericHypervectorSet",
 ]
@@ -43,6 +44,10 @@ class BaseHypervectorSet(ABC):
             return []
         return self._values
     
+    @property
+    def type(self):
+        return self._type
+    
     def __iter__(self):
         yield from self.keys
     
@@ -65,6 +70,11 @@ class BaseHypervectorSet(ABC):
         indent = len(class_name) + 1
         repr = ('\n' + ' '*indent).join(pprint.pformat(self.keys, indent=1, width=80 - indent).split("\n"))
         return f"{class_name}({repr})"
+    
+    @property
+    def similarity(self) -> torch.Tensor: # pairwise similarity of the basis
+        sim = torchhd.cosine_similarity(self.values, self.values)
+        return sim
 
 
 class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
@@ -82,8 +92,6 @@ class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
         config = CategoricalConfiguration("", values=values)
         self.__init__(config)
         return self
-        
-
 
 
 class NumericHypervectorSet(BaseHypervectorSet, _type="numeric"):
@@ -94,5 +102,4 @@ class NumericHypervectorSet(BaseHypervectorSet, _type="numeric"):
             num_vectors=len(self.keys),
             **self._hv_kwargs
         )
-        
-   
+    
