@@ -14,7 +14,9 @@ from .comparison import Comparison
 from .hypervector_sets import HypervectorSet, CategoricalHypervectorSet
 
 class Dataset():
-    def __init__(self, configurations:AttributeGroup, samples:pd.DataFrame):
+    def __init__(self, samples:pd.DataFrame, configurations:AttributeGroup=None):
+        if configurations is None:
+            configurations = AttributeGroup.default(samples)
         self._configurations = configurations
         self._samples = samples[self.attributes].copy() # only the needed attributes
         self._roles = CategoricalHypervectorSet.from_values(self.attributes)
