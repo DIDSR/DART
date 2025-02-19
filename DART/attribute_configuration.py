@@ -3,7 +3,6 @@ __all__ = [
     "CategoricalConfiguration",
     "NumericConfiguration",
     "AttributeGroup",
-    "get_default_configuration",
 ]
 
 from collections.abc import Iterable
@@ -18,14 +17,24 @@ from .parameters import parameters
    
 
 class BaseConfiguration():
+    """
+    The base class for configuring attributes of different types.
+    Specific subclasses should be used in favor of this class.
+
+    Parameters
+    ----------
+    source : str
+        The name of the column (in the dataframe) in which this attribute's values can be found.
+    include : bool, default = True
+        Whether this attribute should be included when encoding attribute information.
+    """
     subclasses = {}
     def __init__(self, 
                  source:str, 
-                 name:str=None, 
                  include:bool=True,
                  ):
         self.source = source
-        self.name = name
+        self.name = None # TODO
         self.include = include
     
     def __init_subclass__(cls, _type):
@@ -35,6 +44,7 @@ class BaseConfiguration():
 
     @classmethod
     def from_config(cls, config:dict):
+        """ Constructs a configuration object from a provided dictionary. """
         assert "_type" in config
         _type = config["_type"]
         del config["_type"]
@@ -42,6 +52,7 @@ class BaseConfiguration():
     
     @property
     def is_valid(self):
+        """ Whether the current attribute configuration is valid (validity depends on attribute type). """
         return len(self.validate) < 1
 
     def validate(self) -> list: # to be fleshed out as needed for subclasses; only for things that cannot be checked during property setting (e.g., that involve >1 property)
@@ -50,6 +61,7 @@ class BaseConfiguration():
 
     @property
     def source(self): 
+        """ The name of the column in the sample dataframe that contains this attribute's values. """
         return self._source
     
     @source.setter
@@ -71,7 +83,8 @@ class BaseConfiguration():
         self._name = value
 
     @property
-    def include(self): # TODO
+    def include(self):
+        """ Whether the attribute should be included when creating a DART Dataset. """
         return self._include   
     
     @include.setter
@@ -82,6 +95,7 @@ class BaseConfiguration():
 
     @property
     def type(self):
+        """ The type of attribute this object represents. """
         if not hasattr(self, "_type"):
             return None
         return self._type
@@ -91,7 +105,8 @@ class BaseConfiguration():
         return { "source":self.source, "name":self.name, "type":self.type, "include":self.include }
     
     @property
-    def __config__(self): # the minimum information needed to recreate
+    def __config__(self):
+        """ Returns the minimum information needed to recreate this object using the .from_config method. """
         return { "source":self._source, "name": self._name, "_type": self.type, "include":self._include }
 
     def __repr__(self):
@@ -100,6 +115,24 @@ class BaseConfiguration():
     
 
 class CategoricalConfiguration(BaseConfiguration, _type="categorical"):
+    """
+    Configuration object for categorical attributes.
+
+    Parameters
+    ----------
+    source : str
+        The name of the column (in the dataframe) in which this attribute's values can be found.
+    values : Iterable
+        All unique values that may be provided as a value of this attribute.
+    groups : dict[str,Iterable], default={}
+        Optional groupings that can be used to encode multiple unique `values` as equivalent.
+    ungrouped_behavior : {"individual", "single"}, default="individual"
+        How values not specified in `groups` should be handled. 
+        If "individual" each value is used to create a single item group.
+        If "single" all ungrouped values are combined into a single group named "unassigned".
+    **kwargs
+        Extra arguments passed to :class:`.BaseConfiguration`.
+    """
     def __init__(self, 
                  source:str, 
                  values:Iterable, 
@@ -114,16 +147,19 @@ class CategoricalConfiguration(BaseConfiguration, _type="categorical"):
 
     @classmethod
     def from_numeric(cls, numeric):
+        """ Creates a CategoricalConfiguration object from a NumericConfiguration. """
         values = [y for x in numeric.bins.values() for y in x]
         self = cls.__new__(cls)
         self.__init__(numeric.source, values)
         return self
     
     def to_numeric(self, value_mapping:dict={}):
+        """ Converts object to a NumericConfiguration. """
         return NumericConfiguration.from_categorical(self, value_mapping=value_mapping)
 
     @property
     def values(self):
+        """ All unique values that may be provided as a value of this attribute. """
         return self._values
     
     @values.setter
@@ -135,6 +171,7 @@ class CategoricalConfiguration(BaseConfiguration, _type="categorical"):
 
     @property
     def groups(self): # NOTE: this logic calls at the getter to support preserving the original provided group list
+        """ Indicates which values are considered equivalent or unique. """
         assigned = set([str(y) for x in self._groups.values() for y in x])
         accounted = set(self.values)
         # deal with values specified in groups that aren't supported values
@@ -172,13 +209,35 @@ class CategoricalConfiguration(BaseConfiguration, _type="categorical"):
 
 
 class NumericConfiguration(BaseConfiguration, _type="numeric"):
+    """
+    Configuration object for numeric attributes.
+    
+    Parameters
+    ----------
+    source : str
+        The name of the column (in the dataframe) in which this attribute's values can be found.
+    min : Number
+        The minimum allowed value of this attribute.
+    max : Number
+        The maximum allowed value of this attribute.
+    step : Number
+        The granularity of this attribute's values. E.g., a step size of 1 indicates whole numbers (provided both min and max where whole numbers).
+    bin : Number or {"auto", "none"}, default="auto"
+        The size of the bins to create. 
+        If "auto" the bin size is automatically determined from min and max.
+        If "none", values are not binned.
+    dtype : {"auto", "float", "int"}, default="auto"
+        Whether the numbers are ints, floats, or this should be determined automatically from the allowed values.
+    **kwargs
+        Extra arguments passed to :class:`.BaseConfiguration`.
+    """
     def __init__(self, 
                  source:str,
                  min:Number, 
                  max:Number,
                  step:Number,
                  bin:Number|Literal["auto","none"]="auto",
-                 dtype:Literal["auto","none","float","int"]="auto",
+                 dtype:Literal["auto","float","int"]="auto",
                  **kwargs):
         super().__init__(source, **kwargs)
         self.min = min
@@ -210,9 +269,11 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
         return cls.from_values(categorical.source, values)
 
     def to_categorical(self):
+        """ Converts the object to a CategoricalConfiguration. """
         return CategoricalConfiguration.from_numeric(self)
     
     def validate(self) -> list:
+        """ Ensures that the provided min, max, and step make a valid range. """
         errors = super().validate()
         if (_range := self.max - self.min) / self.step < 0:
             errors.append(f"Cannot reach max ({self.max}) from min ({self.min}) with step ({self.step})")
@@ -282,7 +343,7 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
     
     @bin.setter
     def bin(self, value): # TODO: improve error handling
-        if value == "auto":
+        if value in ["auto", "none"]:
             self._bin = value
             return
         if isinstance(value, str):
@@ -294,7 +355,7 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
     def dtype(self):
         if self._dtype == "auto":
             numbers = [self._min, self._max, self._step]
-            if self._bin != "auto":
+            if self._bin not in ["auto", "none"]:
                 numbers.append(self._bin)
             if all([n % 1 == 0 for n in numbers]):
                 return "int"
@@ -340,6 +401,14 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
 
 
 class AttributeGroup():
+    """
+    Organizes individual :class:`BaseConfiguration` objects into a group that can be used to create a dataset.
+
+    Parameters
+    ----------
+    attributes : list[BaseConfiguration]
+        The :class:`BaseConfiguration` objects to group.
+    """
     def __init__(self, attributes:list[BaseConfiguration]):
         self._attributes = {}
         for attribute in attributes:
@@ -347,7 +416,8 @@ class AttributeGroup():
     
     @classmethod
     def default(cls, data:pd.DataFrame|pd.Series, **kwargs):
-        attributes = get_default_configuration(data, **kwargs)
+        """ Constructs an :class:`AttributeGroup` from the default configuration of the provided samples. """
+        attributes = _get_default_configuration(data, **kwargs)
         self = cls.__new__(cls)
         self.__init__(attributes)
         return self
@@ -356,7 +426,7 @@ class AttributeGroup():
     def attributes(self):
         return [*self._attributes.keys()]
 
-    def add(self, attribute:BaseConfiguration): # NOTE: using source since name can theorhetically change during config, if that isn't a problem then best to switch to names
+    def add(self, attribute:BaseConfiguration): 
         """ Adds an attribute to the group, while ensuring that all attributes have unique names. """
         assert attribute.source not in self.attributes # TODO: improve error handling
         self._attributes[attribute.source] = attribute
@@ -383,16 +453,12 @@ class AttributeGroup():
     
 
 
-def get_default_configuration(
+def _get_default_configuration(
         data:pd.Series|pd.DataFrame, 
         include_columns:list=None, 
         exclude_columns:list=[],
         drop_missing:bool=True, # NOTE: currently things downstream only work if missing is dropped!
     ) -> list[BaseConfiguration]:
-    """ 
-    Determines the type of a provided data series (single attribute) based on the values provided, 
-    returns the appropriate type of configuration
-    """
     if isinstance(data, pd.DataFrame):
         columns = set([*data.columns]).difference(set(exclude_columns))
         if include_columns is not None:
