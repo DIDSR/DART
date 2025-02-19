@@ -4,3 +4,4 @@ from .comparison import *
 from .hypervector_sets import *
 from .dataset import *
 from .utilities import *
+from . import toy
