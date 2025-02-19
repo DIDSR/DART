@@ -1,0 +1,4 @@
+/* Remove the copyright (and the rest of the footer, since there is not easy way to just remove the copyright notice */
+div.footer {
+    visibility: hidden;
+}
