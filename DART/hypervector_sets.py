@@ -17,7 +17,7 @@ class HypervectorSet():
     Constructs a :class:`BaseHypervectorSet` of the appropriate type. 
     
     Parameters
-    ==========
+    ----------
     config : :class:`BaseConfiguration`
         The config of the attribute from which to construct a set of hypervectors.
     """
