@@ -31,7 +31,7 @@ class Dataset():
         self._configurations = configurations
         self._samples = samples[self.attributes].copy() # only the needed attributes
         self._roles = CategoricalHypervectorSet.from_values(self.attributes)
-        self._basis = {att: HypervectorSet(self.configurations[att]) for att in self.attributes if att.include}
+        self._basis = {att: HypervectorSet(self.configurations[att]) for att in self.attributes if self.configurations[att].include}
         # switch the samples from raw values to binned/grouped values
         for att in self.attributes:
             if (t := self.configurations[att].type) == "categorical":
