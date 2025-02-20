@@ -13,6 +13,14 @@ from .attribute_configuration import *
 from .parameters import parameters
 
 class HypervectorSet():
+    """ 
+    Constructs a :class:`BaseHypervectorSet` of the appropriate type. 
+    
+    Parameters
+    ==========
+    config : :class:`BaseConfiguration`
+        The config of the attribute from which to construct a set of hypervectors.
+    """
     def __new__(self, config:BaseConfiguration):
         assert config.type in BaseHypervectorSet.subclasses
         return BaseHypervectorSet.subclasses[config.type](config)
@@ -78,6 +86,14 @@ class BaseHypervectorSet(ABC):
 
 
 class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
+    """
+    A set of hypervectors representing a categorical variable (i.e., unique values have no inherent similarity).
+
+    Parameters
+    ----------
+    config : :class:`CategoricalConfiguration`
+        The configuration object describing the categorical attribute.
+    """
     def __init__(self, config:CategoricalConfiguration):
         super().__init__()
         self._keys = [*config.groups]
@@ -88,6 +104,14 @@ class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
     
     @classmethod
     def from_values(cls, values): # for the creation of role HVsets
+        """
+        Constructs a :class:`CategoricalHypervectorSet` directly from a list of provided values.
+
+        Parameters
+        ----------
+        values : Iterable
+            The supported unique values of this attribute.
+        """
         self = cls.__new__(cls)
         config = CategoricalConfiguration("", values=values)
         self.__init__(config)
@@ -95,6 +119,15 @@ class CategoricalHypervectorSet(BaseHypervectorSet, _type="categorical"):
 
 
 class NumericHypervectorSet(BaseHypervectorSet, _type="numeric"):
+    """
+    A set of hypervectors representing a numeric attribute
+    (i.e., where the similarity of two values depends on their difference and the defined range (min,max) of the attribute).
+
+    Parameters
+    ----------
+    config : :class:`NumericConfiguration`
+        The configuration object desribing the numeric attribute.
+    """
     def __init__(self, config:NumericConfiguration):
         super().__init__()
         self._keys = [*config.bins]
