@@ -103,7 +103,8 @@ class Dataset():
     def compare(self, 
                 criteria1:dict|list|int, 
                 criteria2:dict|list|int, 
-                similarity_attributes:list|str=None,
+                similarity_attributes:list[str]|str=None,
+                subgroup_attributes:list[str]|str=None,
                 ignore_inherent:bool=True,
                 max_intersectionality_level:int=0,
                 comparison_type:Literal["default", "extensive", "overall", "individual"]="default",
@@ -119,6 +120,11 @@ class Dataset():
         similarity_attributes : list or str, default: None
             The attributes which should be encoded into the hypervector representation to measure 
             (i.e., the attributes with which the similarity values are wrt). If none, uses all attributes.
+        
+        subgroup_attributes : list or str, default: None
+            The attributes that may be used to define intersectional subgroups within the populations defined by the provided criteria.
+            If None, uses all attributes not included in the provided criteria.
+            (Only has an effect with max_intersectionality_level != 0.)
 
         ignore_inherent : bool, default: True
             Whether attributes which are part of a population's definition should be considered as potential similarity attributes.
@@ -142,11 +148,21 @@ class Dataset():
         inherent_attributes = set([x for criteria in [criteria1, criteria2] for x in criteria])
         if similarity_attributes is None:
             similarity_attributes = [*self.attributes]
+        elif isinstance(similarity_attributes, str):
+            similarity_attributes = [similarity_attributes]
         noninherent_attributes = list(set(similarity_attributes).difference(inherent_attributes))
+        if subgroup_attributes is None:
+            subgroup_attributes = [*noninherent_attributes]
+        elif isinstance(subgroup_attributes, str):
+            subgroup_attributes = [subgroup_attributes]
+        if any([att in inherent_attributes for att in subgroup_attributes]):
+            overlap = list(inherent_attributes.intersection(set(subgroup_attributes)))
+            print(f"WARNING: cannot use any of the attributes in provided criteria to further define intersectional subgroups. Removing the following attribute(s) from subgroup_attributes: {overlap}")
+            subgroup_attributes = list(set(subgroup_attributes).difference(inherent_attributes))
         if max_intersectionality_level == -1:
             max_intersectionality_level = len(noninherent_attributes)
         comparisons = Comparison(criteria1, criteria2, ignore_inherent)
-        for subgroup in self.subgroups(max_intersectionality_level, noninherent_attributes):
+        for subgroup in self.subgroups(max_intersectionality_level, subgroup_attributes):
             indexes1 = self.index({**criteria1, **subgroup})
             indexes2 = self.index({**criteria2, **subgroup})
             if len(indexes1) < 1 or len(indexes2) < 1:
