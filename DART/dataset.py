@@ -15,6 +15,16 @@ from .comparison import Comparison
 from .hypervector_sets import HypervectorSet, CategoricalHypervectorSet
 
 class Dataset():
+    """
+    Facilitates the creation of :class:`HypervectorSet` objects and the comparison of user-defined groups.
+
+    Parameters
+    ==========
+    samples : pd.DataFrame
+        Dataset sample information; each row is a unique sample and each column is a unique attribute.
+    configurations : :class:`AttributeGroup`
+        Configurations of the attributes contained in samples. Only attributes with include = True will be used.
+    """
     def __init__(self, samples:pd.DataFrame, configurations:AttributeGroup=None):
         if configurations is None:
             configurations = AttributeGroup.default(samples)
@@ -71,6 +81,17 @@ class Dataset():
                   max_level:int,
                   attributes:list,
                 ) -> Iterable:
+        """
+        Gets a list of all possible subgroups (attribute:value) sets with the provided settings.
+
+        Parameters
+        ----------
+        max_level : int
+            The maximum level of subgroup intersectionality that will be considered. 
+            The level of subgroup intersectionality refers to the number of attributes used to define the subgroup.
+        attributes : list,
+            The names of the attributes with respect to which the subgroups may be defined.
+        """
         for level in range(max_level+1):
             for attribute_combination in combinations(attributes, level):
                 for attribute_values in product(*[self.samples[att].unique() for att in attribute_combination]):
@@ -81,7 +102,7 @@ class Dataset():
                 criteria2:dict|list|int, 
                 similarity_attributes:list|str=None,
                 ignore_inherent:bool=True,
-                max_intersectionality_level:int=1,
+                max_intersectionality_level:int=0,
                 comparison_type:Literal["default", "extensive", "overall", "individual"]="default",
                 ) -> Comparison:
         """
@@ -103,12 +124,16 @@ class Dataset():
             The maximum number of other attributes to add to the criteria definitions to look at intersectional population similarity.
             if -1, will go as deep as possible. If 0, will only compare the attributes specified directly by the criteria.
         
-        comparison_type : str, default: "default"
+        comparison_type : {"individual", "overall", "default", "extensive"}, default: "default"
             Which combinations of the similarity attributes to measure the similarity wrt.
             "individual" - measure separately for each attribute
             "overall" - take one measurement that encorperates all similarity attributes
             "default" - individual + overall
             "extensive" - take a measurement for every possible combination of similarity attributes
+        
+        Returns
+        -------
+        :class:`Comparison`
         """
         assert comparison_type in ["individual", "overall", "default", "extensive"]
         inherent_attributes = set([x for criteria in [criteria1, criteria2] for x in criteria])
