@@ -10,6 +10,7 @@ import random
 import seaborn as sns
 from scipy.stats import skewnorm
 
+from .parameters import parameters
 
 provided_configs = {
     "age_and_sex": [
@@ -32,9 +33,9 @@ provided_configs = {
     },
 ]
 }
-def generate_toy_example(*attribute_configs, num_samples:int=100, random_state:int=None) -> pd.DataFrame:
+def generate_toy_example(*attribute_configs, num_samples:int=100) -> pd.DataFrame:
     """ Generates a toy dataset from the provided attribute configurations. """
-    state = random.Random(random_state)
+    state = random.Random(parameters["random_state"])
     data = {}
     for attribute in attribute_configs:
         if attribute['type'] == 'categorical':
@@ -49,7 +50,7 @@ def generate_toy_example(*attribute_configs, num_samples:int=100, random_state:i
             if attribute['distribution'] == "normal": # a normal distribution (with optional skew)
                 values = randn_skew(
                     N=num_samples, 
-                    random_state=random_state,
+                    random_state=parameters["random_state"],
                     minimum=attribute['min'],
                     maximum=attribute['max'],
                     step=attribute['step'],

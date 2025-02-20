@@ -23,6 +23,7 @@ class Parameters(MutableMapping, dict):
         "numeric.ideal_bin_count": [5,10],
         "hypervectors.dimensions": 10000,
         "hypervectors.architecture": "MAP",
+        "random_state": None,
     }
     supported_architectures = ["MAP"]
 
@@ -45,6 +46,9 @@ class Parameters(MutableMapping, dict):
             raise Exception(f"The architecture \"{val}\" is not currently supported.")
         if key == "hypervectors.dimensions" and val < 10000:
             print(f"Warning: it is recommended that the hypervector dimensionality be >=10,000. Using dimensionality \"{val}\" may produce unexpected results.")
+        if key == "random_state":
+            if val is not None and not isinstance(val, int):
+                raise Exception(f"random_state must be either an integer or None.")
         # TODO: improve parameter validation
         self._set(key, val)
     
