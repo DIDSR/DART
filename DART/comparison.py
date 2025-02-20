@@ -49,16 +49,17 @@ class Comparison():
     def __getitem__(self, index:int):
         return self.items[index]
     
-    def export(self, orient:Literal["minimal", "maximal"]="minimal", include_empty:bool=False) -> dict:
+    def export(self, orient:Literal["minimal", "maximal", "tabular"]="minimal", include_empty:bool=False) -> dict|list:
         """
-        Exports the comparison information to a dictionary.
+        Exports the comparison information to a dictionary or a list (depending on the value of orient).
 
         Parameters
         ----------
-        orient : {"minimal","maximal"}
+        orient : {"minimal","maximal", "tabular"}
             Format of how the information should be saved. 
             "minimal" avoids repeating information that applies to multiple :class:`ComparisonItem` objects.
             "maximal" repeats information, producing a more reader-friendly output.
+            "tabular" similar to "maximal", but doesn't include :class:`Comparison`-wide information (such as the original two criteria) and formats lists into strings.
         include_empty : bool, default = False
             If False, :class:`ComparisonItem` objects with no similarity values will be excluded.
         """
@@ -72,8 +73,10 @@ class Comparison():
                 "base_populations": self.criteria,
                 "comparisons": items
             }
-        elif orient == "maximal": # repeat shared information
+        elif orient in ["maximal", "tabular"]:
             records = [x for item in items for x in item]
+        else:
+            raise Exception(f"Unrecognized value of \"orient\" (\"{orient}\"); must be one of: [\"minimal\", \"maximal\", \"tabular\"].")
         return records
 
     
@@ -137,7 +140,7 @@ class ComparisonItem():
         repr = ('\n' + ' '*indent).join(pprint.pformat(self.subgroup, indent=1, width=80 - indent).split("\n"))
         return f"{class_name}({repr})"
     
-    def export(self, orient:Literal["minimal","maximal"]="minimal") -> dict|list:
+    def export(self, orient:Literal["minimal","maximal", "tabular"]="minimal") -> dict|list:
         """
         Exports this item's content to a dictionary or list (depending on the value of orient).
 
@@ -147,6 +150,7 @@ class ComparisonItem():
             Format of how the information should be saved. 
             "minimal" avoids repeating information that applies to multiple :class:`ComparisonItem` objects.
             "maximal" repeats information, producing a more reader-friendly output.
+            "tabular" similar to "maximal", but doesn't include :class:`Comparison`-wide information (such as the original two criteria) and formats lists into strings.
         """
         if orient == "minimal":
             records = {
@@ -160,6 +164,15 @@ class ComparisonItem():
                 records.append({
                     "subgroups": self.subgroups,
                     "similarity_from": list(attributes),
+                    "comparison_level": self.level,
+                    "similarity": similarity
+                })
+        elif orient == "tabular":
+            records = []
+            for attributes, similarity in self.items():
+                records.append({
+                    "subgroup": "; ".join([f"{attribute}: {value}" for (attribute, value) in self.subgroup.items()]),
+                    "similarity_from": "; ".join(list(attributes)),
                     "comparison_level": self.level,
                     "similarity": similarity
                 })
