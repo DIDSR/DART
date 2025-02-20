@@ -2,15 +2,21 @@ __all__ = [
     "Comparison"
 ]
 
-"""
-Classes to help organize complex comparison outputs,
-the actual comparison process is part of Dataset.
-"""
-
 import pprint
 from typing import Literal
 
 class Comparison():
+    """
+    Helps organize complex comparison outputs. 
+    The actual comparison process is part of :class:`Dataset`.
+
+    Parameters
+    ----------
+    criteria1, criteria2 : dict
+        Criteria describing the two defined groups being compared.
+    ignore_inherent : bool
+        The ignore_inherent setting passed to :meth:`Dataset.compare`.
+    """
     def __init__(self, criteria1:dict, criteria2:dict, ignore_inherent:bool):
         self._criteria1 = {**criteria1}
         self._criteria2 = {**criteria2}
@@ -44,6 +50,18 @@ class Comparison():
         return self.items[index]
     
     def export(self, orient:Literal["minimal", "maximal"]="minimal", include_empty:bool=False) -> dict:
+        """
+        Exports the comparison information to a dictionary.
+
+        Parameters
+        ----------
+        orient : {"minimal","maximal"}
+            Format of how the information should be saved. 
+            "minimal" avoids repeating information that applies to multiple :class:`ComparisonItem` objects.
+            "maximal" repeats information, producing a more reader-friendly output.
+        include_empty : bool, default = False
+            If False, :class:`ComparisonItem` objects with no similarity values will be excluded.
+        """
         items = [item.export(orient=orient) for item in self.items]
         
         if orient == "minimal":
@@ -60,6 +78,22 @@ class Comparison():
 
     
 class ComparisonItem():
+    """
+    Holds the comparisons related to a specific intersectional subgroup.
+    Should be created via the :meth:`Comparison.add` method.
+
+    Parameters
+    ----------
+    parent : :class:`Comparison`
+        The :class:`Comparison` object that this item belongs to.
+    subgroup : dict
+        The intersectional subgroup that this item describes.
+    similarities : dict
+        The similarity values this object will store, in format {(similarity_attributes,) : similarity_value}.
+    insufficient_samples : bool, default = False
+        Flag passed if one or more of the gorups being compared had no samples and thus comparisons could not be made.
+
+    """
     def __init__(self, parent: Comparison, subgroup:dict, similarities:dict, insufficient_samples:bool=False):
         self._parent = parent
         self._subgroup = subgroup
@@ -72,10 +106,15 @@ class ComparisonItem():
     
     @property
     def subgroup(self):
+        """ The intersectional subgroup definition of this specific item. """
         return self._subgroup
     
     @property
     def subgroups(self):
+        """ 
+        The full description of the groups being compared, 
+        a combintation of the two criteria items of the parent :class:`Comparison` and this object's intersectional subgroup.
+        """
         return [
             {**self.parent._criteria1, **self.subgroup},
             {**self.parent._criteria2, **self.subgroup},
@@ -99,6 +138,16 @@ class ComparisonItem():
         return f"{class_name}({repr})"
     
     def export(self, orient:Literal["minimal","maximal"]="minimal") -> dict|list:
+        """
+        Exports this item's content to a dictionary or list (depending on the value of orient).
+
+        Parameters
+        ----------
+        orient : {"minimal", "maximal"}, default = "minimal"
+            Format of how the information should be saved. 
+            "minimal" avoids repeating information that applies to multiple :class:`ComparisonItem` objects.
+            "maximal" repeats information, producing a more reader-friendly output.
+        """
         if orient == "minimal":
             records = {
                 "subgroup": self.subgroup,
