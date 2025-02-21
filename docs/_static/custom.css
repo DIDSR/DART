@@ -2,3 +2,22 @@
 div.footer {
     visibility: hidden;
 }
+
+table.image-table { /* Tables designed just to show images next to each other */
+    border-style: none;
+    box-shadow: none;
+    td, th, tr {
+        border-style: none;
+    }
+    p { /* styling the captions */
+        font-size: smaller; 
+        text-align: center;
+    }
+}
+
+p, div.body p { /* Fixing Sphinx's tendency to have tons of hyphens */
+    hyphens: manual;
+    -moz-hyphens: manual;
+    -ms-hyphens: manual;
+    -webkit-hyphens: manual;
+}
