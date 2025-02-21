@@ -22,11 +22,13 @@ table.image-table {
     }
 }
 
-
-
 p, div.body p { /* Fixing Sphinx's tendency to have tons of hyphens */
     hyphens: manual;
     -moz-hyphens: manual;
     -ms-hyphens: manual;
     -webkit-hyphens: manual;
+}
+
+section[id="contents"] { /* removing the contents list from the home page */
+    display: none;
 }
