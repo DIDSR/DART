@@ -11,4 +11,5 @@ Contents
    self
    getting_started
    HDC
+   example
    DART
