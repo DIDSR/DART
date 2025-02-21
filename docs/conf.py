@@ -35,7 +35,10 @@ html_theme = 'alabaster'
 html_theme_options = { # options available depend on the theme used
     "github_user": "DIDSR",
     "github_repo": "DART",
-    "description": "Quantitative DAta RepresenTativeness measurement"
+    "description": "Quantitative DAta RepresenTativeness assessment",
+    "logo": "DART-LOGO-1.png",
+    "logo_name": True,
+    "sidebar_width": "250px",
 }
 
 html_static_path = ['_static']

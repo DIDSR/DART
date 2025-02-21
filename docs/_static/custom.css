@@ -32,3 +32,18 @@ p, div.body p { /* Fixing Sphinx's tendency to have tons of hyphens */
 section[id="contents"] { /* removing the contents list from the home page */
     display: none;
 }
+
+/* Resize the very large logo */
+div.sphinxsidebarwrapper p.logo { 
+    width: 100%;
+    text-align: left;
+    img.logo { /* the logo itself*/
+        width: 50%;
+    }
+}
+
+/* shrink the size of the blurb text (prevent needing so many lines) */
+div.sphinxsidebarwrapper p.blurb {
+    font-size: x-small;
+    font-style: italic;
+}
