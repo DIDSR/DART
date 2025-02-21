@@ -12,7 +12,7 @@ Attribute Types
 This allows for a distinction between attributes where there is no inherent similarity between different values (e.g., categorical) and attributes where different values 
 may have varying degrees of similarity with each other (e.g., numeric).
 
-.. rst-class:: image-table
+.. rst-class:: column-table, image-table
 .. list-table::
     :widths: 50 50
     :header-rows: 0

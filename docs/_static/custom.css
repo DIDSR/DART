@@ -3,17 +3,26 @@ div.footer {
     visibility: hidden;
 }
 
-table.image-table { /* Tables designed just to show images next to each other */
+table.column-table { /* Tables designed just to show two columns of content */
     border-style: none;
     box-shadow: none;
-    td, th, tr {
+    > tbody > tr { /* just removing borders from the column-table and it's direct contents, not any nested tables */
         border-style: none;
-    }
+        > td, > th {
+            border-style: none;
+            vertical-align: top;
+        }
+    }    
+}
+
+table.image-table {
     p { /* styling the captions */
         font-size: smaller; 
         text-align: center;
     }
 }
+
+
 
 p, div.body p { /* Fixing Sphinx's tendency to have tons of hyphens */
     hyphens: manual;
