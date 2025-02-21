@@ -1,34 +1,9 @@
 # DAta RepresenTativeness (DART)
 
-DART is a python package designed to facilitate measuring dataset distribution matches through the use of hyperdimensional computing.
-This is done by encoding attribute (metadata) information into hypervectors (high-dimensional vectors), which can then be combined to represent individual samples or entire datasets/populations.
+DART is a python package which facilitates distributional similarity measurements at both population and subpopulation levels. 
+DART encodes attribute (metadata) information into hypervectors (high-dimensional vectors) which can then be used combined to represent individual samples or entire datasets following the principles of hyperdimensional computing.
 
+Hyperdimensional computing allows for the nuanced representation of different attribute types through the creation of hypervectors with varying amounts of similarity to each other.
+This enables proper representation of different types of attributes, such as drawing a distinction between categorical attributes (for which distinct values have no inherent similarity) and numeric attributes (for which the inherent similarity between any two values depends on their difference).
 
-## Implementation Progress
-
- - [ ] **Setup**
-   - [ ] Read data file input
-     - [x] csv
-     - [x] tsv
-     - [ ] json
-   - [ ] Attribute Configuration
-     - [x] get default
-     - [ ] read provided file/dictionary
-   - [x] Attribute Types (configuration)
-     - [x] Categorical
-     - [x] Numeric
-   - [x] Encode Attributes into Basis Hypervector Sets
-     - [ ] Validate expected similarities
-   - [x] Encode samples into single hypervectors
-     - [x] Validate extract correct values
-   - [x] ~~Encode *all* samples into single representative dataset hypervector~~ ***postponed****
-     - [ ] ~~Validate extract sample information~~ ***postponed****
- - [x] **Comparison**
-   - [x] Receive user comparison request (file/dictionary)
-   - [ ] ~~Query Specific samples from dataset hypervector~~ ***postponed****
-   - [x] Measure needed similarity values
-   - [ ] Output format: visual
-   - [x] Output format: quantitative
- - [ ] **Pipeline:** singular pipeline script to run through the entire process, with all needed information provided up front
-  > *Bundling all of the samples into a single representative hypervector would be ideal (as it would mean that we wouldn't need to hold all of the samples in memory, and could instead query all the needed values out of one stored hypervector), but I haven't found a way to do the encoding that doesn't introduce too much noise to be able to accurately retreive the input values, may not be feasible with large complex datasets.
-
+More information can be found in the [DART documentation] (**link to be added upon GitHub pages release**) and a full implementation example can be found in the [test notebook](https://github.com/DIDSR/DART/blob/main/test.ipynb).
