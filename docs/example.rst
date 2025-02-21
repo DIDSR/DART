@@ -2,7 +2,7 @@ Example
 =======
 
 .. note:: Want more details or just prefer to run the code yourself? 
-    This example is also available in our `example notebook <https://github.com/DIDSR/DART/blob/main/example.ipynb>`_.
+    This example is also available in our `test notebook <https://github.com/DIDSR/DART/blob/main/test.ipynb>`_.
 
 Suppose you have a dataset ("Population A") that you want to compare to a reference population ("Population B"). 
 Assessments of the distributional similarity would typically be done by looking at the histograms of the different :abbr:`attributes (distinct pieces of metadata information)`:
