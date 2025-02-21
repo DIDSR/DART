@@ -26,8 +26,8 @@ may have varying degrees of similarity with each other (e.g., numeric).
       - The similarity values between any two numeric attribute values depend on their relative value.
         The values representing the minimum and maximum values (1 and 5, respectively) have a similarity of approximately 0.
 
-To illustrate the importance of this property, let's consider a simple toy attribute that can have the values 1, 2, 3, 4 or 5. 
-Suppose we want to measure the similarity of the "population i" to the other two "populations" shown in the table below.
+The importance of this property can be illustrated though the consideration of a simple toy attribute that can have the values 1, 2, 3, 4 or 5. 
+Assume that the distribution of this attribute in "population i" needs to be compared to the two other "populations" shown in the table below.
 
 .. list-table::
     :widths: 10 20
@@ -42,9 +42,10 @@ Suppose we want to measure the similarity of the "population i" to the other two
     * - iii
       - 3
 
-If we wanted to measure the population similarities using a distribution similarity measurement like Jenson-Shannon distance (JSD), 
-then we would need to convert each population into a probability distribution, 
-while to use :abbr:`HDC (hyperdimensional computing)` we would encode each population into a :abbr:`hypervector (hyperdimensional vector)` (which have been shortened in the table below).
+The comparison can be made using a distribution similarity measurement like Jenson-Shannon distance (JSD).
+Such a measurement first requires converting the populations into probability distributions.
+Similarly, :abbr:`HDC (hyperdimensional computing)` requires that each population is encoded into a :abbr:`hypervector (hyperdimensional vector)`.
+Both the probability distribution and hypervector representations of the three populations are shown in the table below; the hypervectors have been shortened to fit in the table.
 
 .. list-table::
     :widths: 10 20 20
@@ -63,9 +64,7 @@ while to use :abbr:`HDC (hyperdimensional computing)` we would encode each popul
       - [0, 0, 1, 0, 0]
       - [-1, 1, -1, ..., 1, 1, -1]
 
-In both these approachs we can now measure the distribution similarity to determine which of the other two "populations" are the most similar to "population i". 
-This is accomplished using :abbr:`JSD (jenson-shannon distance)` to measure the similarity of the probability distributions and 
-cosine similarity to measure :abbr:`hypervector (hyperdimensional vector)` similarity.
+Finally, distributional similarity measurements are taken using Jenson-Shannon distance to measure the similarity of the probability distributions, and cosine similarity to measure the similarity of the hypervectors.
 
 .. list-table:: Similarity to "population i"
     :widths: 10 20 20

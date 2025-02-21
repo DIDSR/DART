@@ -35,7 +35,7 @@ html_theme = 'alabaster'
 html_theme_options = { # options available depend on the theme used
     "github_user": "DIDSR",
     "github_repo": "DART",
-    "description": "Quantitative DAta RepresenTativeness measurment"
+    "description": "Quantitative DAta RepresenTativeness measurement"
 }
 
 html_static_path = ['_static']
