@@ -32,7 +32,8 @@ class Dataset():
             configurations = AttributeGroup.default(samples)
         self._configurations = configurations
         self._samples = samples[self.attributes].copy() # only the needed attributes
-        torch.manual_seed(parameters['random_state']) # fix random state (if not None) prior to hypervector generation
+        if parameters["random_state"] is not None:
+            torch.manual_seed(parameters['random_state']) # fix random state (if not None) prior to hypervector generation
         self._roles = CategoricalHypervectorSet.from_values(self.attributes)
         self._basis = {att: HypervectorSet(self.configurations[att]) for att in self.attributes if self.configurations[att].include}
         # switch the samples from raw values to binned/grouped values
