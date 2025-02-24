@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = [
     "read_files_to_dataframe",
     "isNumeric",
