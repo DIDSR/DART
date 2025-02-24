@@ -12,7 +12,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "seaborn",
-    "ipykernal",
+    "ipykernel",
 ]
 
 [tool.setuptools]
