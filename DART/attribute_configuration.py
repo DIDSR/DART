@@ -8,6 +8,7 @@ __all__ = [
 
 from collections.abc import Iterable
 from numbers import Number
+import numpy as np
 import pandas as pd 
 from pandas.api.types import is_numeric_dtype
 import pprint
@@ -335,7 +336,7 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
             pref =[n for n in n_bins if n >= parameters["numeric.ideal_bin_count"][0] and n <= parameters["numeric.ideal_bin_count"][-1]]
             if len(pref) < 1:
                 print(f"Warning: could not determine a bin size for \"{self.name}\" please specify a bin number (not binning)")
-                value = abs(self.value)
+                value = abs(self.step)
             else:
                 value = potential[n_bins.index(max(pref))]
         else:
@@ -382,7 +383,7 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
         n_bins = round((self.max-self.min)/B)
         bin_ranges = [[ self.min+(B*i), self.min+(B*(i+1)) ] for i in range(n_bins)]
         bin_ranges[-1][-1] = max(bin_ranges[-1][-1],self.max + self.step)
-        return { f"[{L}, {U})":[*range(L,U,self.step)] for [L,U] in bin_ranges}
+        return { f"[{L}, {U})":[*np.arange(L,U,self.step)] for [L,U] in bin_ranges}
 
     def _set_type(self, value):
         if self.dtype == "int":
@@ -422,6 +423,7 @@ class AttributeGroup():
         self = cls.__new__(cls)
         self.__init__(attributes)
         return self
+                
 
     @property
     def attributes(self):
