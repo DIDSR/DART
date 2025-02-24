@@ -41,9 +41,10 @@ class Dataset():
         for att in self.attributes:
             if (t := self.configurations[att].type) == "categorical":
                 mapping = {v:k for (k, values) in self.configurations[att].groups.items() for v in values}
+                self.samples[att] = self.samples[att].map(mapping)
             elif t == 'numeric':
-                mapping = {v:k for (k, values) in self.configurations[att].bins.items() for v in values}
-            self.samples[att] = self.samples[att].map(mapping)
+                self.samples[att] = self.samples[att].apply(self.configurations[att].bin_value)
+                
 
     @property 
     def configurations(self):

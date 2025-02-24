@@ -383,7 +383,19 @@ class NumericConfiguration(BaseConfiguration, _type="numeric"):
         n_bins = round((self.max-self.min)/B)
         bin_ranges = [[ self.min+(B*i), self.min+(B*(i+1)) ] for i in range(n_bins)]
         bin_ranges[-1][-1] = max(bin_ranges[-1][-1],self.max + self.step)
-        return { f"[{L}, {U})":[*np.arange(L,U,self.step)] for [L,U] in bin_ranges}
+        return { f"[{L}, {U})":(L,U) for [L,U] in bin_ranges}
+    
+    def bin_value(self, value) -> str:
+        """ 
+        Returns the string representing the correct bin for the provided value. 
+        Raises exception if the value is outside of the attribute's supported range.
+        """
+        if value < self.min or value > self.max:
+            raise Exception(f"The provided value {value} is outside of the supported range for the attribute {self.name} ([{self.min}, {self.max}])")
+        for (B, (lower,upper)) in self.bins.items():
+            if value >= lower and value < upper:
+                return B
+        
 
     def _set_type(self, value):
         if self.dtype == "int":
@@ -423,7 +435,9 @@ class AttributeGroup():
         self = cls.__new__(cls)
         self.__init__(attributes)
         return self
-                
+    
+    
+            
 
     @property
     def attributes(self):
