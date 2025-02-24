@@ -436,7 +436,20 @@ class AttributeGroup():
         self.__init__(attributes)
         return self
     
-    
+    @classmethod
+    def from_config(cls, config:dict, data:pd.DataFrame|pd.Series=None):
+        """ Constructs an attribute group from the provided configurations or "default". """
+        if any([v == "default" for v in config.values()]) and data is None:
+            raise Exception(f"Data must be provided to gather default configurations.")
+        configurations = []
+        for attribute, cfg in config.items():
+            if cfg == "default":
+                configurations += _get_default_configuration(data, include_columns=[attribute])
+            else:
+                configurations.append(BaseConfiguration.from_config(cfg))
+        self = cls.__new__(cls)
+        self.__init__(configurations)
+        return self
             
 
     @property
