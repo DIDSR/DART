@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DART"
+version = "1.0.0"
+dependencies = [
+    "torch-hd",
+]
+
+[project.optional-dependencies]
+test = [
+    "seaborn",
+    "ipykernal",
+]
+
+[tool.setuptools]
+package-dir = {"" = "DART"}
+
