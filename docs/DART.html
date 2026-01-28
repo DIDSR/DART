@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>DART package &#8212; DART  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=877b1dcb" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Example" href="example.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="dart-package">
+<h1>DART package<a class="headerlink" href="#dart-package" title="Link to this heading">¶</a></h1>
+<section id="attribute-configuration">
+<h2>Attribute configuration<a class="headerlink" href="#attribute-configuration" title="Link to this heading">¶</a></h2>
+</section>
+<section id="hypervector-sets">
+<h2>Hypervector Sets<a class="headerlink" href="#hypervector-sets" title="Link to this heading">¶</a></h2>
+</section>
+<section id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-DART.parameters">
+<span id="parameters"></span><h2>Parameters<a class="headerlink" href="#module-DART.parameters" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="DART.parameters.Parameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">DART.parameters.</span></span><span class="sig-name descname"><span class="pre">Parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DART.parameters.Parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Manages package-wide parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Specified parameter values. Default values will be used for any parameter not specified.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">parameters</span></code> is a global version of <a class="reference internal" href="#DART.parameters.Parameters" title="DART.parameters.Parameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameters</span></code></a> with all default values.</p>
+</dd></dl>
+
+</section>
+<section id="module-DART.comparison">
+<span id="comparison-outputs"></span><h2>Comparison Outputs<a class="headerlink" href="#module-DART.comparison" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="DART.comparison.Comparison">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">DART.comparison.</span></span><span class="sig-name descname"><span class="pre">Comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">criteria1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_inherent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DART.comparison.Comparison" title="Link to this definition">¶</a></dt>
+<dd><p>Helps organize complex comparison outputs.
+The actual comparison process is part of <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>criteria1</strong> (<em>dict</em>) – Criteria describing the two defined groups being compared.</p></li>
+<li><p><strong>criteria2</strong> (<em>dict</em>) – Criteria describing the two defined groups being compared.</p></li>
+<li><p><strong>ignore_inherent</strong> (<em>bool</em>) – The ignore_inherent setting passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">Dataset.compare()</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="DART.comparison.Comparison.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'minimal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'maximal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'tabular'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'minimal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_empty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></span><a class="headerlink" href="#DART.comparison.Comparison.export" title="Link to this definition">¶</a></dt>
+<dd><p>Exports the comparison information to a dictionary or a list (depending on the value of orient).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orient</strong> (<em>{&quot;minimal&quot;</em><em>,</em><em>&quot;maximal&quot;</em><em>, </em><em>&quot;tabular&quot;}</em>) – Format of how the information should be saved.
+“minimal” avoids repeating information that applies to multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonItem</span></code> objects.
+“maximal” repeats information, producing a more reader-friendly output.
+“tabular” similar to “maximal”, but doesn’t include <a class="reference internal" href="#DART.comparison.Comparison" title="DART.comparison.Comparison"><code class="xref py py-class docutils literal notranslate"><span class="pre">Comparison</span></code></a>-wide information (such as the original two criteria) and formats lists into strings.</p></li>
+<li><p><strong>include_empty</strong> (<em>bool</em><em>, </em><em>default = False</em>) – If False, <code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonItem</span></code> objects with no similarity values will be excluded.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/DART-LOGO-1.png" alt="Logo" />
+    
+    <h1 class="logo logo-name">DART</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Quantitative DAta RepresenTativeness assessment</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=DIDSR&repo=DART&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">DAta RepresenTativeness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDC.html">Why hyperdimensional computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DART package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#attribute-configuration">Attribute configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hypervector-sets">Hypervector Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DART.parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DART.comparison">Comparison Outputs</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="example.html" title="previous chapter">Example</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Alexis Burgon and Ravi Samala.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/DART.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
