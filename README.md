@@ -2,7 +2,7 @@
 
 DART is a python package which facilitates distributional similarity measurements at both population and subpopulation levels.
 
-![{IMAGE ALT TEXT}]("{RELATIVE_FILE_PATH_TO_THE_OVERVIEW_FIGURE.png}")
+![{DART overview image}]("./docs/DART_overview_image.png")
 
 ---
 
