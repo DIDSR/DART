@@ -7,7 +7,7 @@ DART is a python package which facilitates distributional similarity measurement
 ---
 
 > [!NOTE]
-> The detailed documentation for this repository can be accessed at {LINK TO HOSTED DOCUMENTATION}
+> The detailed documentation for this repository can be accessed at [didsr.github.io/DART/](https://didsr.github.io/DART/)
 
 # Overview
 DART encodes attribute (metadata) information into hypervectors (high-dimensional vectors) which can then be used combined to represent individual samples or entire datasets following the principles of hyperdimensional computing.
