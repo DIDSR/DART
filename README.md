@@ -27,6 +27,9 @@ A full implementation example can be found in the [test notebook](https://github
 
 ## References
 
+ - A. Burgon, N. Petrick, D. Krainal, A. Khan, and R. K. Samala, "Data Representativeness with Hyperdimensional Computing" *Under review*
+ - A. Burgon, N. Petrick, D. Krainal, A. Khan, and R. K. Samala, "Metadata distribution evaluation through hyperdimensional encoding", *Accepted at SPIE Medical Imaging, 2026*
+
 ### Tool Reference
 
 **RST Reference Number:** TBD
