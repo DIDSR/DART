@@ -1,0 +1,49 @@
+/* Remove the copyright (and the rest of the footer, since there is not easy way to just remove the copyright notice */
+div.footer {
+    visibility: hidden;
+}
+
+table.column-table { /* Tables designed just to show two columns of content */
+    border-style: none;
+    box-shadow: none;
+    > tbody > tr { /* just removing borders from the column-table and it's direct contents, not any nested tables */
+        border-style: none;
+        > td, > th {
+            border-style: none;
+            vertical-align: top;
+        }
+    }    
+}
+
+table.image-table {
+    p { /* styling the captions */
+        font-size: smaller; 
+        text-align: center;
+    }
+}
+
+p, div.body p { /* Fixing Sphinx's tendency to have tons of hyphens */
+    hyphens: manual;
+    -moz-hyphens: manual;
+    -ms-hyphens: manual;
+    -webkit-hyphens: manual;
+}
+
+section[id="contents"] { /* removing the contents list from the home page */
+    display: none;
+}
+
+/* Resize the very large logo */
+div.sphinxsidebarwrapper p.logo { 
+    width: 100%;
+    text-align: left;
+    img.logo { /* the logo itself*/
+        width: 50%;
+    }
+}
+
+/* shrink the size of the blurb text (prevent needing so many lines) */
+div.sphinxsidebarwrapper p.blurb {
+    font-size: x-small;
+    font-style: italic;
+}
